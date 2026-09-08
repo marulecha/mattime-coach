@@ -1,4 +1,6 @@
 <title>MAT TIME - Coach</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
@@ -37,9 +39,9 @@
 
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
 button,input,select{font:inherit;color:inherit}
-button{cursor:pointer;background:none;border:0;padding:0}
+button{cursor:pointer;background:none;border:0;padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;text-wrap:balance;line-height:1.05}
 .num{font-variant-numeric:tabular-nums}
@@ -72,6 +74,8 @@ h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;text-wrap:balance;l
 .status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .status.live::before{background:var(--ok)}
 .status.local::before{background:var(--accent)}
+.status .short{display:none}
+.panel .sheet-only,.sheet-bg{display:none}
 .tabs{display:flex;gap:2px;background:var(--surface-3);padding:3px;border-radius:9px}
 .tab{padding:7px 16px;border-radius:7px;font-weight:600;color:var(--muted);font-size:14px}
 .tab:hover{color:var(--ink)}
@@ -143,6 +147,7 @@ select.input{padding-right:28px}
 .panel{position:sticky;top:16px;display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
 .panel-head{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
 .panel-head .label{margin-bottom:2px}
+.panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .panel-head h3{font-size:28px}
 .panel-head .sub{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;color:var(--muted);font-size:13px}
 .panel-head .sub b{font-family:var(--display);font-size:22px;color:var(--ink);font-weight:700}
@@ -280,6 +285,7 @@ tr.detail td{background:var(--surface-2);padding:6px 14px 16px 62px;border-top:0
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .add-form{grid-template-columns:1fr 1fr}
   .add-form .field:first-child{grid-column:1 / -1}
+  .add-form .btn{grid-column:1 / -1;justify-content:center;min-height:44px}
   .mrow{grid-template-columns:38px minmax(0,1fr) auto;gap:10px}
   .mrow .stat{display:none}
   .mrow .acts{grid-column:3}
@@ -288,13 +294,126 @@ tr.detail td{background:var(--surface-2);padding:6px 14px 16px 62px;border-top:0
   .frow .sub{grid-column:1 / -1}
   .section-title{flex-wrap:wrap}
 }
-@media (max-width: 560px){
-  .day{min-height:64px;padding:5px 6px 6px}
-  .dnum{font-size:16px}
-  .dots .dot{width:6px;height:6px}
-  .cal-head h2,.roster-head h2,.sum-head h2{font-size:34px}
+
+/* Phones: bottom tab bar, day panel as a bottom sheet, compact calendar, no sideways tables */
+@media (max-width: 700px){
+  :root{--nav-h:calc(56px + env(safe-area-inset-bottom, 0px))}
+  .app{padding:10px 12px calc(var(--nav-h) + 24px)}
+  .input{font-size:16px}
+  .top{gap:8px 12px;padding-bottom:10px;margin-bottom:14px}
+  .brand{gap:10px}
+  .brand .mark{width:30px;height:30px}
+  .brand .mark i{width:18px;height:5px}
+  .brand h1{font-size:22px}
+  .status{font-size:11px}
+  .status .long{display:none}
+  .status .short{display:inline}
+  .me{margin-left:auto;gap:0}
+  .me b{display:none}
+  .me .btn.sm{padding:7px 9px}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:26;height:var(--nav-h);padding:6px 8px calc(6px + env(safe-area-inset-bottom, 0px));border-radius:0;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+  .tab{padding:0;display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:8px}
+  .tab.active{background:var(--surface-3);box-shadow:none}
+  .banner{flex-wrap:wrap;font-size:13px;padding:10px 12px}
+  .toast{bottom:calc(var(--nav-h) + 12px)}
+  .gate{min-height:100dvh;padding:16px}
+  .login{padding:22px 18px 18px}
+
+  /* calendar */
+  .cal-head{margin-bottom:8px;align-items:center}
+  .cal-head h2 span{font-size:20px;margin-left:6px}
+  .cal-nav .btn{padding:9px 14px;min-height:40px}
+  .month-meta{gap:12px;font-size:12px;flex-wrap:wrap;margin-bottom:10px}
+  .month-meta b{font-size:16px}
+  .cal-grid{gap:3px}
+  .dow{font-size:10px;padding:2px 0 4px;letter-spacing:.06em}
+  .day{min-height:54px;padding:4px 5px 5px;gap:3px;border-radius:7px}
+  .day.today::after{border-radius:7px}
+  .dnum{font-size:14px}
+  .count{font-size:11px;padding:1px 4px}
+  .dots{gap:2px}
+  .dots .dot{width:5px;height:5px}
+  .dots .more{font-size:9px;margin-left:1px}
   .day .capn{display:none}
-  .tile .v{font-size:30px}
+
+  /* day panel -> bottom sheet above the tab bar */
+  .cal-layout{display:block}
+  .sheet-bg{display:block;position:fixed;inset:0;background:rgba(8,10,14,.45);z-index:24;opacity:0;pointer-events:none;transition:opacity .2s}
+  .sheet-bg.show{opacity:1;pointer-events:auto}
+  .panel{position:fixed;top:auto;left:0;right:0;bottom:var(--nav-h);z-index:25;max-height:calc(100vh - var(--nav-h) - 44px);max-height:calc(100dvh - var(--nav-h) - 44px);border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -8px 32px rgba(0,0,0,.28);visibility:hidden;transform:translateY(8%)}
+  .panel.open{visibility:visible;transform:none}
+  .panel.enter{animation:sheet-up .26s cubic-bezier(.2,.8,.2,1)}
+  @keyframes sheet-up{from{transform:translateY(24%);opacity:.5}to{transform:none;opacity:1}}
+  .panel .handle.sheet-only{display:block;width:40px;height:4px;border-radius:2px;background:var(--line-strong);margin:8px auto 0;flex:none}
+  .panel .btn.sheet-only{display:inline-flex}
+  .panel-head{padding:4px 16px 10px}
+  .panel-head h3{font-size:22px}
+  .panel-head .sub{font-size:12px}
+  .panel-head .sub b{font-size:20px}
+  .lesson{padding:10px 16px 11px}
+  .lesson.add{padding:12px 16px}
+  .checklist{max-height:none}
+  .person{padding:11px 10px}
+  .panel-foot .btn{min-height:44px}
+  body.sheet-open{overflow:hidden}
+
+  /* roster */
+  .cal-head h2,.roster-head h2,.sum-head h2{font-size:30px}
+  .roster-head,.sum-head{margin-bottom:12px;gap:6px 12px}
+  .add-form{padding:12px;gap:8px}
+  .mrow{padding:10px 12px}
+  .mrow .acts .btn{padding:7px 9px}
+  .editrow .input{flex:1 1 120px}
+  .section-title{margin:18px 0 8px;gap:8px}
+  .section-title h3{font-size:17px}
+
+  /* summary */
+  .tiles{gap:8px;margin-bottom:14px}
+  .tile{padding:12px 12px 10px}
+  .tile .v{font-size:28px}
+  .tile .sub{font-size:11px}
+  table{min-width:0}
+  th{padding:10px 8px 8px;font-size:10px;letter-spacing:.06em;white-space:normal}
+  td{padding:10px 8px}
+  td .who{gap:8px}
+  .students th:nth-child(4),.students td:nth-child(4),.students th:nth-child(5),.students td:nth-child(5){display:none}
+  .pct .track{width:36px}
+  .datechip{white-space:nowrap}
+  td .big{font-size:19px}
+  tr.detail td{padding:6px 12px 14px}
+  .mon{grid-template-columns:1fr;gap:4px}
+  .wkleg{display:none}
+  .frow{padding:10px 12px;gap:8px 12px}
+  .frow .stat b{font-size:19px}
+  .techs td{padding:8px 10px}
+}
+@media (max-width: 480px){
+  .frow{grid-template-columns:minmax(0,1fr) auto}
+  .frow .btn{grid-column:1 / -1;justify-self:start}
+  .techs th:nth-child(2),.techs td:nth-child(2){display:none}
+  .sum-head .right{width:100%;justify-content:space-between}
+}
+/* Touch devices: bigger targets, no sticky hover */
+@media (pointer: coarse){
+  .btn.sm{min-height:36px}
+  .chip{padding:7px 12px}
+  .chips.tiny .chip{padding:6px 11px;font-size:12px}
+  .datechip{padding:6px 9px}
+  .lesson-edit{top:6px}
+}
+@media (hover: none){
+  .day:hover{border-color:var(--line)}
+  .day.future:hover{border-color:var(--line)}
+  .person:hover{background:transparent}
+  .person:active{background:var(--surface-2)}
+  .btn:hover{background:var(--surface)}
+  .btn.quiet:hover{background:transparent}
+  .btn:active{background:var(--surface-2)}
+  .btn.primary:hover{opacity:1}
+  .chip:not(.active):hover{color:var(--muted)}
+  .tab:not(.active):hover{color:var(--muted)}
+  .lesson.add:hover{background:transparent;color:var(--muted)}
+  tr.mem:not(.open):hover td{background:transparent}
 }
 @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
 </style>
@@ -369,7 +488,22 @@ const state = {
   fadeDays: 14,
   mode: 'connecting',
   ready: false,
+  sheet: true,      // phones only: the day panel is a bottom sheet; true = open
+  sheetAnim: false, // play the slide-up on the next render
 };
+let resetChecklist = false; // next render starts the checklist at the top (new day selected)
+
+/* Select a day on the calendar. On phones the day panel is a bottom sheet, so
+   selecting also opens it (with a slide-up the first time it appears). */
+function selectDay(date) {
+  state.selected = date;
+  state.q = '';
+  state.lessonEdit = false; state.lessonDraft = null;
+  state.sheetAnim = !state.sheet; state.sheet = true;
+  resetChecklist = true;
+  const d = parse(date);
+  state.cursor = new Date(d.getFullYear(), d.getMonth(), 1);
+}
 let backend = null;
 let downloads = null;
 let toastTimer = null;
@@ -381,9 +515,10 @@ function toast(msg) {
 function setStatus() {
   const el = $('#status');
   el.className = 'status';
-  if (state.mode === 'db') { el.classList.add('live'); el.textContent = 'Shared · live for everyone at the gym'; }
-  else if (state.mode === 'local') { el.classList.add('local'); el.textContent = 'Saved on this device · encrypted'; }
-  else el.textContent = 'Connecting…';
+  const txt = (long, short) => { el.innerHTML = `<span class="long">${long}</span><span class="short">${short}</span>`; };
+  if (state.mode === 'db') { el.classList.add('live'); txt('Shared · live for everyone at the gym', 'Shared · live'); }
+  else if (state.mode === 'local') { el.classList.add('local'); txt('Saved on this device · encrypted', 'On this device'); }
+  else txt('Connecting…', 'Connecting…');
 }
 
 /* ---------- backends ---------- */
@@ -637,6 +772,7 @@ function render() {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === state.view));
   renderBanner();
   const main = $('#main');
+  document.body.classList.remove('sheet-open');
   if (!state.ready) { main.innerHTML = '<div class="loading">Loading attendance…</div>'; return; }
   if (state.unreadable) {
     main.innerHTML = `<div class="card empty" style="max-width:520px;margin:40px auto"><h3 style="font-size:22px;margin-bottom:8px">Saved data can't be opened</h3>
@@ -644,9 +780,15 @@ function render() {
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" data-act="restore">Restore backup</button><button class="btn danger" data-act="reset-device">Erase data on this device</button></div></div>`;
     return;
   }
+  const prevList = main.querySelector('.checklist');
+  const keep = !resetChecklist && prevList ? prevList.scrollTop : 0;
+  resetChecklist = false;
   if (state.view === 'calendar') main.innerHTML = renderCalendarView();
   else if (state.view === 'roster') main.innerHTML = renderRoster();
   else main.innerHTML = renderSummary();
+  if (keep) { const list = main.querySelector('.checklist'); if (list) list.scrollTop = keep; }
+  document.body.classList.toggle('sheet-open', state.view === 'calendar' && state.sheet);
+  state.sheetAnim = false;
 }
 
 function renderBanner() {
@@ -658,7 +800,7 @@ function renderBanner() {
 
 /* Calendar */
 function renderCalendarView() {
-  return `<div class="cal-layout"><section>${renderCalendar()}</section>${renderDayPanel()}</div>`;
+  return `<div class="cal-layout"><section>${renderCalendar()}</section>${renderDayPanel()}<div class="sheet-bg ${state.sheet ? 'show' : ''}" data-act="close-sheet" aria-hidden="true"></div></div>`;
 }
 function renderCalendar() {
   const y = state.cursor.getFullYear(), m = state.cursor.getMonth();
@@ -741,9 +883,11 @@ function renderDayPanel() {
     </div>`
     : `<button class="lesson add" data-lesson="edit"><span class="plus">+</span>${locked ? 'Plan the technique for this class' : 'Add technique of the day'}</button>`;
 
-  return `<aside class="card panel ${locked ? 'locked' : ''}" aria-label="Attendance for selected day">
+  const panelCls = ['card', 'panel', locked && 'locked', state.sheet && 'open', state.sheetAnim && 'enter'].filter(Boolean).join(' ');
+  return `<aside class="${panelCls}" aria-label="Attendance for selected day">
+    <div class="handle sheet-only" aria-hidden="true"></div>
     <div class="panel-head">
-      <div class="label">${date === TODAY ? 'Today' : locked ? 'Upcoming' : 'Class day'}</div>
+      <div class="panel-top"><div class="label">${date === TODAY ? 'Today' : locked ? 'Upcoming' : 'Class day'}</div><button class="btn sm quiet sheet-only" type="button" data-act="close-sheet">Done</button></div>
       <h3>${fmtLong(date)}</h3>
       <div class="sub"><span>${locked ? 'Attendance opens on the day. You can plan the lesson now.' : 'Tap a name to mark them present.'}</span><b class="num">${[...present].filter(id => state.members[id]).length}</b></div>
     </div>
@@ -872,7 +1016,7 @@ function renderSummary() {
     </div>
     ${fadingHTML}
     <div class="section-title"><h3>Students</h3></div>
-    <div class="card table">
+    <div class="card table students">
       ${rows.length ? `<table>
         <thead><tr><th>Student</th><th class="r">Sessions</th><th>Of classes held</th><th>Mon → Sun</th><th class="r">Streak</th><th class="r">Last class</th></tr></thead>
         <tbody>${rows.map(tr).join('')}</tbody>
@@ -955,15 +1099,16 @@ document.addEventListener('click', e => {
     return render();
   }
   if (el.dataset.fade) { state.fadeDays = Number(el.dataset.fade); return render(); }
+  if (el.dataset.act === 'close-sheet') { state.sheet = false; return render(); }
   if (el.dataset.act === 'remove-sample') return removeSampleData();
   if (el.dataset.act === 'load-sample') return loadSampleData();
   if (el.dataset.act === 'export') return exportCSV();
   if (el.dataset.nav) {
-    if (el.dataset.nav === 'today') { state.cursor = new Date(todayD.getFullYear(), todayD.getMonth(), 1); state.selected = TODAY; }
+    if (el.dataset.nav === 'today') { state.cursor = new Date(todayD.getFullYear(), todayD.getMonth(), 1); state.selected = TODAY; resetChecklist = true; }
     else state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + Number(el.dataset.nav), 1);
     return render();
   }
-  if (el.dataset.date) { state.selected = el.dataset.date; state.q = ''; state.lessonEdit = false; state.lessonDraft = null; return render(); }
+  if (el.dataset.date) { selectDay(el.dataset.date); return render(); }
   if (el.dataset.toggle) return togglePresent(state.selected, el.dataset.toggle);
   if (el.dataset.edit) { state.editing = state.editing === el.dataset.edit ? null : el.dataset.edit; return render(); }
   if (el.dataset.archive) {
@@ -976,10 +1121,11 @@ document.addEventListener('click', e => {
     return;
   }
   if (el.dataset.range) { state.range = el.dataset.range; return render(); }
-  if (el.dataset.goto) { state.view = 'calendar'; state.selected = el.dataset.goto; state.lessonEdit = false; state.lessonDraft = null; const d = parse(el.dataset.goto); state.cursor = new Date(d.getFullYear(), d.getMonth(), 1); return render(); }
+  if (el.dataset.goto) { state.view = 'calendar'; selectDay(el.dataset.goto); return render(); }
   if (el.dataset.open) { state.openMember = state.openMember === el.dataset.open ? null : el.dataset.open; return render(); }
 });
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.sheet && state.view === 'calendar' && !state.lessonEdit) { state.sheet = false; return render(); }
   if (e.key !== 'Enter' && e.key !== ' ') return;
   const row = e.target.closest && e.target.closest('tr.mem[data-open]');
   if (row) { e.preventDefault(); state.openMember = state.openMember === row.dataset.open ? null : row.dataset.open; render(); }
