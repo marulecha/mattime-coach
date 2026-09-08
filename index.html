@@ -63,12 +63,6 @@ h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;text-wrap:balance;l
 .login .hint{font-size:13px;color:var(--muted);margin:0;line-height:1.45}
 .login .link{align-self:flex-start;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 .login .link:hover{color:var(--ink)}
-dialog.pass{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:22px 24px;width:min(360px,92vw);box-shadow:var(--shadow)}
-dialog.pass::backdrop{background:rgba(0,0,0,.45)}
-dialog.pass form{display:flex;flex-direction:column;gap:12px}
-dialog.pass h3{font-size:22px}
-dialog.pass label{display:flex;flex-direction:column;gap:5px}
-dialog.pass .acts{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
 @media (max-width: 900px){ .me{margin-left:0} }
 .brand .mark{width:34px;height:34px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
 .brand .mark i{display:block;width:20px;height:6px;border-radius:1px;background:var(--bg);position:relative}
@@ -327,20 +321,11 @@ tr.detail td{background:var(--surface-2);padding:6px 14px 16px 62px;border-top:0
   <main id="main"><div class="loading">Loading attendance…</div></main>
 </div>
 <div class="toast" id="toast" role="status"></div>
-<dialog class="pass" id="pass-dialog">
-  <form id="pass-form" method="dialog">
-    <h3>Change password</h3>
-    <label><span class="label">Current password</span><input class="input" name="cur" type="password" autocomplete="current-password" required></label>
-    <label><span class="label">New password</span><input class="input" name="next" type="password" autocomplete="new-password" minlength="6" required></label>
-    <label><span class="label">Repeat new password</span><input class="input" name="again" type="password" autocomplete="new-password" minlength="6" required></label>
-    <div class="err" id="pass-err" role="alert" style="color:var(--danger);font-size:13px;min-height:1.2em"></div>
-    <div class="acts"><button class="btn sm quiet" type="button" data-act="pass-cancel">Cancel</button><button class="btn sm primary" type="submit" value="save">Save</button></div>
-  </form>
-</dialog>
 
 <script>
 (() => {
 'use strict';
+
 
 /* ---------- helpers ---------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -444,7 +429,7 @@ async function setupLocal() {
       const legacy = localStorage.getItem(LEGACY_KEY);
       if (legacy) { data = JSON.parse(legacy); migrated = true; }
     }
-  } catch (e) { console.error(e); toast('Could not read the data saved on this device.'); }
+  } catch (e) { console.error(e); state.unreadable = true; }
   if (data) { state.members = data.members || {}; state.days = data.days || {}; }
   let saving = null;
   const save = () => {
@@ -465,7 +450,7 @@ let unsubs = [];
 function teardown() {
   unsubs.forEach(u => { try { u(); } catch (e) { /* ignore */ } });
   unsubs = []; backend = null;
-  state.members = {}; state.days = {}; state.ready = false; state.lessonEdit = false; state.lessonDraft = null; state.editing = null; state.openMember = null; state.view = 'calendar';
+  state.members = {}; state.days = {}; state.ready = false; state.lessonEdit = false; state.lessonDraft = null; state.editing = null; state.openMember = null; state.view = 'calendar'; state.unreadable = false;
   $('#main').innerHTML = '';
 }
 async function init() {
@@ -652,6 +637,12 @@ function render() {
   renderBanner();
   const main = $('#main');
   if (!state.ready) { main.innerHTML = '<div class="loading">Loading attendance…</div>'; return; }
+  if (state.unreadable) {
+    main.innerHTML = `<div class="card empty" style="max-width:520px;margin:40px auto"><h3 style="font-size:22px;margin-bottom:8px">Saved data can't be opened</h3>
+      <p>The attendance stored in this browser was encrypted under a previous password, so it can't be read with the current one. Restore a backup, or erase it and start fresh on this device.</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" data-act="restore">Restore backup</button><button class="btn danger" data-act="reset-device">Erase data on this device</button></div></div>`;
+    return;
+  }
   if (state.view === 'calendar') main.innerHTML = renderCalendarView();
   else if (state.view === 'roster') main.innerHTML = renderRoster();
   else main.innerHTML = renderSummary();
@@ -1034,22 +1025,34 @@ document.addEventListener('input', e => {
 });
 
 /* ---------- sign-in + encryption ----------
-   No password or hash lives in this file. The coach sets a password the first
-   time the app opens in a browser. PBKDF2 turns it into an AES-256 key that
-   both verifies later sign-ins and encrypts everything saved in that browser.
-   Forgetting the password means the data on that device cannot be recovered,
-   so keep a backup (header → Backup). */
-const COACH = 'marion17';
-const AUTH_KEY = 'mat-time-auth', SESSION_KEY = 'mat-time-key', PERSIST_KEY = 'mat-time-key-persist';
-const PBKDF2_ITERATIONS = 310000, PERSIST_HOURS = 12;
+   The coach account is baked in as a VERIFIER, never a password. The verifier
+   is a random salt plus the second half of PBKDF2-SHA256(password, salt,
+   600 000 rounds). The first half of that same derivation is the AES-256 key
+   that encrypts everything saved in the browser, so the same password unlocks
+   the app on every device. Nothing in this file can be turned back into the
+   password, and the password is not recoverable if lost. */
+const COACH_VERIFIER = {
+  user: 'marion17',
+  salt: 'NQXXphsdcxkF4lo61ho5dA==',
+  iterations: 600000,
+  verifier: 'w2YJl8leEPsKl06GqqONnywWD/RYZ7aNjpm0J5KFSkA=',
+};
+const SESSION_KEY = 'mat-time-key', PERSIST_KEY = 'mat-time-key-persist', PERSIST_HOURS = 12;
 let cryptoKey = null, authedUser = null;
 
 const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const secure = () => !!(window.crypto && crypto.subtle && window.isSecureContext !== false);
-async function deriveKey(password, salt, iterations) {
-  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+const importAes = bytes => crypto.subtle.importKey('raw', bytes, 'AES-GCM', true, ['encrypt', 'decrypt']);
+async function deriveBits(password, saltB64, iterations) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: unb64(saltB64), iterations, hash: 'SHA-256' }, base, 512));
+  return { keyBytes: bits.slice(0, 32), verifier: b64(bits.slice(32)) };
+}
+async function verifyPassword(user, password) {
+  if (user !== COACH_VERIFIER.user) return null;
+  const { keyBytes, verifier } = await deriveBits(password, COACH_VERIFIER.salt, COACH_VERIFIER.iterations);
+  return verifier === COACH_VERIFIER.verifier ? importAes(keyBytes) : null;
 }
 async function encryptJSON(key, obj) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -1059,19 +1062,6 @@ async function encryptJSON(key, obj) {
 async function decryptJSON(key, rec) {
   const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(rec.iv) }, key, unb64(rec.ct));
   return JSON.parse(new TextDecoder().decode(pt));
-}
-const authRecord = () => { try { return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (e) { return null; } };
-async function createAuth(password) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const key = await deriveKey(password, salt, PBKDF2_ITERATIONS);
-  const check = await encryptJSON(key, { ok: true, user: COACH });
-  localStorage.setItem(AUTH_KEY, JSON.stringify({ user: COACH, salt: b64(salt), iterations: PBKDF2_ITERATIONS, check }));
-  return key;
-}
-async function verifyPassword(password) {
-  const rec = authRecord(); if (!rec) return null;
-  const key = await deriveKey(password, unb64(rec.salt), rec.iterations);
-  try { const c = await decryptJSON(key, rec.check); return c && c.ok ? key : null; } catch (e) { return null; }
 }
 async function keepKey(key, persist) {
   const raw = b64(await crypto.subtle.exportKey('raw', key));
@@ -1087,8 +1077,7 @@ async function restoreKey() {
       const p = JSON.parse(localStorage.getItem(PERSIST_KEY) || 'null');
       if (p && p.exp > Date.now()) raw = p.k; else localStorage.removeItem(PERSIST_KEY);
     }
-    if (!raw) return null;
-    return await crypto.subtle.importKey('raw', unb64(raw), 'AES-GCM', true, ['encrypt', 'decrypt']);
+    return raw ? await importAes(unb64(raw)) : null;
   } catch (e) { return null; }
 }
 function dropKey() { try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(PERSIST_KEY); } catch (e) { /* ignore */ } }
@@ -1098,91 +1087,45 @@ function renderMe() {
     ? `<b>${esc(authedUser)}</b>
        <button class="btn sm quiet" data-act="backup" title="Download a copy of all data">Backup</button>
        <button class="btn sm quiet" data-act="restore" title="Load a backup file">Restore</button>
-       <button class="btn sm quiet" data-act="change-pass">Password</button>
        <button class="btn sm quiet" data-act="logout">Log out</button>`
     : '';
 }
 function enter(key) {
-  cryptoKey = key; authedUser = COACH;
+  cryptoKey = key; authedUser = COACH_VERIFIER.user;
   $('#gate').hidden = true; $('#app').hidden = false;
   renderMe(); setStatus(); init();
-}
-function gateBrand() {
-  return `<div class="brand"><div class="mark" aria-hidden="true"><i></i></div><h1 style="font-size:24px">Mat Time<span class="coach">Coach</span></h1></div>`;
 }
 function showGate() {
   $('#app').hidden = true; $('#gate').hidden = false;
   const gate = $('#gate');
+  const brand = `<div class="brand"><div class="mark" aria-hidden="true"><i></i></div><h1 style="font-size:24px">Mat Time<span class="coach">Coach</span></h1></div>`;
   if (!secure()) {
-    gate.innerHTML = `<div class="card login">${gateBrand()}<h2>Secure connection needed</h2><p class="hint">Sign-in and encryption need https or a local file. Open the app over https and try again.</p></div>`;
+    gate.innerHTML = `<div class="card login">${brand}<h2>Secure connection needed</h2><p class="hint">Sign-in and encryption need https or a local file. Open the app over https and try again.</p></div>`;
     return;
   }
-  const first = !authRecord();
-  gate.innerHTML = first ? `
-    <form class="card login" id="setup-form" novalidate>
-      ${gateBrand()}
-      <h2>Set your password</h2>
-      <p class="hint">This browser has no coach password yet. Choose one for <b>${COACH}</b>. It also encrypts everything saved here, so nothing is readable without it and it cannot be recovered if forgotten.</p>
-      <label><span class="label">Username</span><input class="input" name="user" value="${COACH}" readonly></label>
-      <label><span class="label">Password</span><input class="input" name="pass" type="password" autocomplete="new-password" minlength="8" required></label>
-      <label><span class="label">Repeat password</span><input class="input" name="again" type="password" autocomplete="new-password" minlength="8" required></label>
-      <button class="btn primary" type="submit">Create password</button>
-      <div class="err" id="login-err" role="alert"></div>
-    </form>`
-  : `
+  gate.innerHTML = `
     <form class="card login" id="login-form" novalidate>
-      ${gateBrand()}
+      ${brand}
       <h2>Coach sign-in</h2>
       <label><span class="label">Username</span><input class="input" name="user" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
       <label><span class="label">Password</span><input class="input" name="pass" type="password" autocomplete="current-password" required></label>
       <label class="check"><input type="checkbox" name="remember"> Stay signed in on this device for ${PERSIST_HOURS} hours</label>
       <button class="btn primary" type="submit">Sign in</button>
       <div class="err" id="login-err" role="alert"></div>
-      <button class="link" type="button" data-act="reset-device">Forgot the password? Reset this device</button>
     </form>`;
-  setTimeout(() => { const p = gate.querySelector(first ? '[name=pass]' : '[name=user]'); if (p) p.focus(); }, 0);
+  setTimeout(() => { const u = gate.querySelector('[name=user]'); if (u) u.focus(); }, 0);
 }
 
 $('#gate').addEventListener('submit', async e => {
   e.preventDefault();
   const f = e.target, err = $('#login-err'), btn = f.querySelector('[type=submit]');
-  const p = f.pass.value;
-  if (f.id === 'setup-form') {
-    if (p.length < 8) { err.textContent = 'Use at least 8 characters. Longer is safer.'; return; }
-    if (p !== f.again.value) { err.textContent = 'The two passwords do not match.'; return; }
-    btn.disabled = true; btn.textContent = 'Creating…';
-    try { const key = await createAuth(p); await keepKey(key, false); enter(key); toast('Password set. Keep a backup from the header.'); }
-    catch (ex) { console.error(ex); err.textContent = 'Could not set the password in this browser.'; btn.disabled = false; btn.textContent = 'Create password'; }
-    return;
-  }
-  const u = f.user.value.trim().toLowerCase();
+  const u = f.user.value.trim().toLowerCase(), p = f.pass.value;
   if (!u || !p) { err.textContent = 'Enter your username and password.'; return; }
-  if (u !== COACH) { err.textContent = 'Wrong username or password.'; f.pass.select(); return; }
   btn.disabled = true; btn.textContent = 'Checking…';
-  const key = await verifyPassword(p).catch(() => null);
+  const key = await verifyPassword(u, p).catch(() => null);
   if (!key) { err.textContent = 'Wrong username or password.'; btn.disabled = false; btn.textContent = 'Sign in'; f.pass.select(); return; }
   await keepKey(key, f.remember.checked);
   enter(key);
-});
-
-$('#pass-form').addEventListener('submit', async e => {
-  const f = e.target, err = $('#pass-err');
-  if (e.submitter && e.submitter.value !== 'save') return;
-  e.preventDefault();
-  if (f.next.value !== f.again.value) { err.textContent = 'The new passwords do not match.'; return; }
-  if (f.next.value.length < 8) { err.textContent = 'Use at least 8 characters.'; return; }
-  const ok = await verifyPassword(f.cur.value).catch(() => null);
-  if (!ok) { err.textContent = 'Current password is wrong.'; return; }
-  try {
-    if (backend && backend.flush) await backend.flush();
-    const key = await createAuth(f.next.value);
-    cryptoKey = key;
-    if (backend && backend.kind === 'local') await backend.persistDay(); // re-encrypt under the new key
-    const persisted = !!localStorage.getItem(PERSIST_KEY);
-    await keepKey(key, persisted);
-    f.reset(); err.textContent = ''; $('#pass-dialog').close();
-    toast('Password changed. Data on this device re-encrypted.');
-  } catch (ex) { console.error(ex); err.textContent = 'Could not change the password here.'; }
 });
 
 /* backup + restore */
@@ -1213,31 +1156,31 @@ $('#restore-file').addEventListener('change', async e => {
     Object.entries(data.members).forEach(([id, m]) => backend.persistMember(id, m));
     Object.entries(data.days).forEach(([d, day]) => backend.persistDay(d, day));
   }
-  state.members = data.members; state.days = data.days;
+  state.members = data.members; state.days = data.days; state.unreadable = false;
   if (backend.kind === 'local') backend.persistDay();
   render();
   toast('Backup restored.');
 });
 
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act="logout"],[data-act="change-pass"],[data-act="pass-cancel"],[data-act="backup"],[data-act="restore"],[data-act="reset-device"]');
+  const el = e.target.closest('[data-act="logout"],[data-act="backup"],[data-act="restore"],[data-act="reset-device"]');
   if (!el) return;
   const act = el.dataset.act;
   if (act === 'logout') { dropKey(); cryptoKey = null; authedUser = null; teardown(); showGate(); }
-  else if (act === 'change-pass') { $('#pass-err').textContent = ''; $('#pass-form').reset(); $('#pass-dialog').showModal(); $('#pass-form').cur.focus(); }
-  else if (act === 'pass-cancel') { $('#pass-form').reset(); $('#pass-dialog').close(); }
   else if (act === 'backup') backup();
   else if (act === 'restore') $('#restore-file').click();
   else if (act === 'reset-device') {
-    if (!confirm('Reset this device? The password and ALL attendance data saved in this browser will be erased. Only do this if you have a backup or the data lives in the shared database.')) return;
-    try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(DATA_KEY); localStorage.removeItem(LEGACY_KEY); } catch (ex) { /* ignore */ }
-    dropKey(); showGate(); toast('Device reset. Choose a new password.');
+    if (!confirm('Erase all attendance data saved in this browser? This cannot be undone. The password is not affected.')) return;
+    try { localStorage.removeItem(DATA_KEY); localStorage.removeItem(LEGACY_KEY); localStorage.removeItem('mat-time-auth'); } catch (ex) { /* ignore */ }
+    state.members = {}; state.days = {}; state.unreadable = false;
+    if (backend && backend.kind === 'local') backend.persistDay();
+    render(); toast('Data on this device erased.');
   }
 });
 
 setStatus();
 (async () => {
-  const key = secure() && authRecord() ? await restoreKey() : null;
+  const key = secure() ? await restoreKey() : null;
   if (key) enter(key); else showGate();
 })();
 })();
