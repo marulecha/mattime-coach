@@ -451,7 +451,7 @@ function teardown() {
   unsubs.forEach(u => { try { u(); } catch (e) { /* ignore */ } });
   unsubs = []; backend = null;
   state.members = {}; state.days = {}; state.ready = false; state.lessonEdit = false; state.lessonDraft = null; state.editing = null; state.openMember = null; state.view = 'calendar'; state.unreadable = false;
-  $('#main').innerHTML = '';
+  $('#main').innerHTML = '<div class="loading">Loading attendance…</div>';
 }
 async function init() {
   const canUse = window.claude && typeof window.claude.use === 'function';
@@ -1064,14 +1064,18 @@ async function pbkdf2(password, saltBytes, iterations) {
   try {
     url = URL.createObjectURL(new Blob([PBKDF2_WORKER], { type: 'text/javascript' }));
     worker = new Worker(url);
-  } catch (e) { return onMainThread(); }
+  } catch (e) { console.warn('[mat-time sign-in] worker unavailable, using main thread', e); return onMainThread(); }
   try {
     return await new Promise((resolve, reject) => {
-      worker.onmessage = ev => ev.data && ev.data.bits ? resolve(new Uint8Array(ev.data.bits)) : reject(new Error(ev.data && ev.data.error || 'worker failed'));
-      worker.onerror = ev => reject(new Error(ev.message || 'worker failed'));
+      // A worker that never answers (blocked by a content-security policy that
+      // does not report) must not hang sign-in: give it 15 s, then fall back.
+      const guard = setTimeout(() => reject(new Error('worker timed out')), 15000);
+      worker.onmessage = ev => { clearTimeout(guard); ev.data && ev.data.bits ? resolve(new Uint8Array(ev.data.bits)) : reject(new Error(ev.data && ev.data.error || 'worker failed')); };
+      worker.onerror = ev => { clearTimeout(guard); reject(new Error(ev.message || 'worker failed')); };
       worker.postMessage({ password, salt: saltBytes.buffer.slice(saltBytes.byteOffset, saltBytes.byteOffset + saltBytes.byteLength), iterations });
     });
   } catch (e) {
+    console.warn('[mat-time sign-in] worker failed, using main thread', e);
     return onMainThread();
   } finally {
     try { worker.terminate(); URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
@@ -1125,6 +1129,7 @@ function renderMe() {
 function enter(key) {
   cryptoKey = key; authedUser = COACH_VERIFIER.user;
   $('#gate').hidden = true; $('#app').hidden = false;
+  if (!state.ready) $('#main').innerHTML = '<div class="loading">Loading attendance…</div>';
   renderMe(); setStatus(); init();
 }
 function showGate() {
@@ -1154,11 +1159,22 @@ $('#gate').addEventListener('submit', async e => {
   const u = f.user.value.trim().toLowerCase(), p = f.pass.value;
   if (!u || !p) { err.textContent = 'Enter your username and password.'; return; }
   btn.disabled = true; btn.textContent = 'Checking…'; err.textContent = '';
+  const t0 = Date.now();
+  const stage = m => console.log(`[mat-time sign-in] ${m} (+${Date.now() - t0} ms)`);
   const slow = setTimeout(() => { err.style.color = 'var(--muted)'; err.textContent = 'Still checking… unlocking can take a few seconds on phones.'; }, 2500);
-  const key = await verifyPassword(u, p).catch(e => { console.error(e); return null; });
+  const watchdog = new Promise(resolve => setTimeout(() => resolve('timeout'), 30000));
+  stage('deriving key');
+  const key = await Promise.race([verifyPassword(u, p).catch(e => { console.error('[mat-time sign-in] derivation failed', e); return null; }), watchdog]);
   clearTimeout(slow); err.style.color = '';
-  if (!key) { err.textContent = 'Wrong username or password.'; btn.disabled = false; btn.textContent = 'Sign in'; f.pass.select(); return; }
-  await keepKey(key, f.remember.checked);
+  if (key === 'timeout') {
+    stage('timed out');
+    err.textContent = 'Sign-in did not finish in 30 seconds. Reload the page and try again; if it repeats, check the browser console for details.';
+    btn.disabled = false; btn.textContent = 'Sign in'; return;
+  }
+  if (!key) { stage('rejected'); err.textContent = 'Wrong username or password.'; btn.disabled = false; btn.textContent = 'Sign in'; f.pass.select(); return; }
+  stage('verified, storing session key');
+  await keepKey(key, f.remember.checked).catch(e => console.error('[mat-time sign-in] could not keep key', e));
+  stage('opening app');
   enter(key);
 });
 
