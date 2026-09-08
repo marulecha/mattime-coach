@@ -1044,9 +1044,41 @@ const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const secure = () => !!(window.crypto && crypto.subtle && window.isSecureContext !== false);
 const importAes = bytes => crypto.subtle.importKey('raw', bytes, 'AES-GCM', true, ['encrypt', 'decrypt']);
+// PBKDF2 is deliberately slow. Run it in a Web Worker so the page never
+// freezes on phones or Safari; fall back to the main thread where workers
+// are not allowed (some embedded viewers).
+const PBKDF2_WORKER = `self.onmessage = async e => {
+  const { password, salt, iterations } = e.data;
+  try {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new Uint8Array(salt), iterations, hash: 'SHA-256' }, base, 512);
+    self.postMessage({ bits }, [bits]);
+  } catch (err) { self.postMessage({ error: String(err && err.message || err) }); }
+};`;
+async function pbkdf2(password, saltBytes, iterations) {
+  const onMainThread = async () => {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: saltBytes, iterations, hash: 'SHA-256' }, base, 512));
+  };
+  let worker = null, url = null;
+  try {
+    url = URL.createObjectURL(new Blob([PBKDF2_WORKER], { type: 'text/javascript' }));
+    worker = new Worker(url);
+  } catch (e) { return onMainThread(); }
+  try {
+    return await new Promise((resolve, reject) => {
+      worker.onmessage = ev => ev.data && ev.data.bits ? resolve(new Uint8Array(ev.data.bits)) : reject(new Error(ev.data && ev.data.error || 'worker failed'));
+      worker.onerror = ev => reject(new Error(ev.message || 'worker failed'));
+      worker.postMessage({ password, salt: saltBytes.buffer.slice(saltBytes.byteOffset, saltBytes.byteOffset + saltBytes.byteLength), iterations });
+    });
+  } catch (e) {
+    return onMainThread();
+  } finally {
+    try { worker.terminate(); URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
+  }
+}
 async function deriveBits(password, saltB64, iterations) {
-  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: unb64(saltB64), iterations, hash: 'SHA-256' }, base, 512));
+  const bits = await pbkdf2(password, unb64(saltB64), iterations);
   return { keyBytes: bits.slice(0, 32), verifier: b64(bits.slice(32)) };
 }
 async function verifyPassword(user, password) {
@@ -1121,8 +1153,10 @@ $('#gate').addEventListener('submit', async e => {
   const f = e.target, err = $('#login-err'), btn = f.querySelector('[type=submit]');
   const u = f.user.value.trim().toLowerCase(), p = f.pass.value;
   if (!u || !p) { err.textContent = 'Enter your username and password.'; return; }
-  btn.disabled = true; btn.textContent = 'Checking…';
-  const key = await verifyPassword(u, p).catch(() => null);
+  btn.disabled = true; btn.textContent = 'Checking…'; err.textContent = '';
+  const slow = setTimeout(() => { err.style.color = 'var(--muted)'; err.textContent = 'Still checking… unlocking can take a few seconds on phones.'; }, 2500);
+  const key = await verifyPassword(u, p).catch(e => { console.error(e); return null; });
+  clearTimeout(slow); err.style.color = '';
   if (!key) { err.textContent = 'Wrong username or password.'; btn.disabled = false; btn.textContent = 'Sign in'; f.pass.select(); return; }
   await keepKey(key, f.remember.checked);
   enter(key);
