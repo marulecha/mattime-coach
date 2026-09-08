@@ -1,0 +1,1244 @@
+<title>MAT TIME - Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF0F2; --surface:#FFFFFF; --surface-2:#F5F6F8; --surface-3:#E9EBEE;
+  --ink:#15191F; --muted:#5B6470; --faint:#8B939D; --line:#D6DBE0; --line-strong:#AEB7C0;
+  --accent:#B8860B; --accent-ink:#7F5C00; --accent-soft:#F6ECCB; --accent-ring:rgba(184,134,11,.35);
+  --danger:#B3261E; --ok:#2E7D4F;
+  --shadow:0 1px 2px rgba(20,25,31,.06),0 8px 24px rgba(20,25,31,.08);
+  --belt-white:#FAFAFA; --belt-blue:#1E5AA8; --belt-purple:#6A3D9A; --belt-brown:#6F4326; --belt-black:#141414;
+  --belt-edge:rgba(0,0,0,.28); --belt-bar:#111111; --belt-bar-black:#B3261E;
+  --display:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171B; --surface:#1C2026; --surface-2:#232830; --surface-3:#2B3139;
+    --ink:#ECEEF0; --muted:#98A1AC; --faint:#6F7985; --line:#2C333B; --line-strong:#465059;
+    --accent:#E3B341; --accent-ink:#F0C860; --accent-soft:#3A3120; --accent-ring:rgba(227,179,65,.4);
+    --danger:#F0776F; --ok:#6CC08B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+    --belt-black:#0B0B0B; --belt-edge:rgba(255,255,255,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171B; --surface:#1C2026; --surface-2:#232830; --surface-3:#2B3139;
+  --ink:#ECEEF0; --muted:#98A1AC; --faint:#6F7985; --line:#2C333B; --line-strong:#465059;
+  --accent:#E3B341; --accent-ink:#F0C860; --accent-soft:#3A3120; --accent-ring:rgba(227,179,65,.4);
+  --danger:#F0776F; --ok:#6CC08B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+  --belt-black:#0B0B0B; --belt-edge:rgba(255,255,255,.3);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;text-wrap:balance;line-height:1.05}
+.num{font-variant-numeric:tabular-nums}
+
+.app{max-width:1240px;margin:0 auto;padding:18px clamp(12px,3vw,32px) 56px}
+
+/* Header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand h1{font-size:30px;letter-spacing:.03em;text-transform:uppercase}
+.brand h1 .coach{color:var(--accent-ink);font-weight:600;margin-left:6px}
+.me{display:flex;align-items:center;gap:2px;font-size:13px;color:var(--muted);margin-left:auto}
+.me b{color:var(--ink);font-weight:600;margin-right:8px}
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg)}
+.login{width:100%;max-width:380px;padding:28px 28px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.login .brand{margin-bottom:6px}
+.login h2{font-size:26px;text-transform:uppercase;letter-spacing:.03em}
+.login label{display:flex;flex-direction:column;gap:5px}
+.login .input{width:100%}
+.login .check{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.login .err{color:var(--danger);font-size:13px;min-height:1.2em}
+.login .hint{font-size:13px;color:var(--muted);margin:0;line-height:1.45}
+.login .link{align-self:flex-start;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.login .link:hover{color:var(--ink)}
+dialog.pass{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:22px 24px;width:min(360px,92vw);box-shadow:var(--shadow)}
+dialog.pass::backdrop{background:rgba(0,0,0,.45)}
+dialog.pass form{display:flex;flex-direction:column;gap:12px}
+dialog.pass h3{font-size:22px}
+dialog.pass label{display:flex;flex-direction:column;gap:5px}
+dialog.pass .acts{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+@media (max-width: 900px){ .me{margin-left:0} }
+.brand .mark{width:34px;height:34px;border-radius:8px;background:var(--ink);display:grid;place-items:center}
+.brand .mark i{display:block;width:20px;height:6px;border-radius:1px;background:var(--bg);position:relative}
+.brand .mark i::after{content:"";position:absolute;right:3px;top:0;bottom:0;width:6px;background:var(--accent)}
+.status{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.status.live::before{background:var(--ok)}
+.status.local::before{background:var(--accent)}
+.tabs{display:flex;gap:2px;background:var(--surface-3);padding:3px;border-radius:9px}
+.tab{padding:7px 16px;border-radius:7px;font-weight:600;color:var(--muted);font-size:14px}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Common */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:600;font-size:14px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);line-height:1.2}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.btn.quiet{border-color:transparent;color:var(--muted)}
+.btn.quiet:hover{color:var(--ink);background:var(--surface-2)}
+.btn.danger{color:var(--danger)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:default}
+.input{padding:8px 11px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);min-width:0}
+.input::placeholder{color:var(--faint)}
+select.input{padding-right:28px}
+.label{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.faint{color:var(--faint)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 11px;border-radius:999px;border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--muted);background:var(--surface)}
+.chip:hover{color:var(--ink)}
+.chip.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.empty{padding:28px 20px;text-align:center;color:var(--muted)}
+.empty p{margin:0 0 12px;max-width:34ch;margin-inline:auto}
+
+/* Belt */
+.belt{display:inline-block;width:30px;height:8px;border-radius:2px;position:relative;flex:none;vertical-align:middle;box-shadow:inset 0 0 0 1px var(--belt-edge)}
+.belt .bar{position:absolute;right:4px;top:0;bottom:0;width:10px;background:var(--belt-bar);display:flex;justify-content:center;gap:1px;padding:1px 0}
+.belt .bar i{display:block;width:1px;background:#FFFFFF}
+.belt.b-white{background:var(--belt-white)}
+.belt.b-blue{background:var(--belt-blue)}
+.belt.b-purple{background:var(--belt-purple)}
+.belt.b-brown{background:var(--belt-brown)}
+.belt.b-black{background:var(--belt-black)}
+.belt.b-black .bar{background:var(--belt-bar-black)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px var(--belt-edge)}
+.dot.b-white{background:var(--belt-white)} .dot.b-blue{background:var(--belt-blue)} .dot.b-purple{background:var(--belt-purple)} .dot.b-brown{background:var(--belt-brown)} .dot.b-black{background:var(--belt-black)}
+
+/* Calendar view */
+.cal-layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:22px;align-items:start}
+.cal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.cal-head h2{font-size:42px;letter-spacing:.01em}
+.cal-head h2 span{color:var(--muted);font-weight:600;margin-left:8px}
+.cal-nav{display:flex;gap:6px;align-items:center}
+.cal-nav .btn{padding:7px 11px}
+.month-meta{display:flex;gap:18px;margin-bottom:14px;color:var(--muted);font-size:13px}
+.month-meta b{color:var(--ink);font-family:var(--display);font-size:20px;font-weight:700;margin-right:4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dow{text-align:center;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:4px 0 6px}
+.day{min-height:84px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 8px 8px;display:flex;flex-direction:column;gap:6px;text-align:left;position:relative;transition:border-color .12s}
+.day:hover{border-color:var(--line-strong)}
+.day.blank{background:transparent;border-color:transparent;pointer-events:none}
+.day.future{background:transparent;border-style:dashed;color:var(--faint)}
+.day.future:hover{border-color:var(--line)}
+.day.today .dnum{color:var(--accent-ink)}
+.day.today::after{content:"";position:absolute;inset:-1px;border-radius:9px;box-shadow:0 0 0 2px var(--accent);pointer-events:none}
+.day.selected{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.day .row{display:flex;justify-content:space-between;align-items:baseline}
+.dnum{font-family:var(--display);font-size:20px;font-weight:700;line-height:1}
+.count{font-family:var(--display);font-size:14px;font-weight:700;background:var(--accent-soft);color:var(--accent-ink);border-radius:5px;padding:2px 6px;line-height:1.1}
+.dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;align-items:center}
+.dots .more{font-size:11px;color:var(--muted);font-weight:600;margin-left:2px}
+
+/* Day panel */
+.panel{position:sticky;top:16px;display:flex;flex-direction:column;max-height:calc(100vh - 32px)}
+.panel-head{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.panel-head .label{margin-bottom:2px}
+.panel-head h3{font-size:28px}
+.panel-head .sub{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;color:var(--muted);font-size:13px}
+.panel-head .sub b{font-family:var(--display);font-size:22px;color:var(--ink);font-weight:700}
+.panel-tools{padding:10px 12px 6px}
+.panel-tools .input{width:100%}
+.checklist{overflow:auto;padding:4px 8px 8px;flex:1;min-height:0}
+.person{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:8px;text-align:left}
+.person:hover{background:var(--surface-2)}
+.person .box{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line-strong);flex:none;display:grid;place-items:center;transition:background .1s,border-color .1s}
+.person .box svg{width:14px;height:14px;opacity:0;stroke:var(--bg);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.person.on .box{background:var(--accent);border-color:var(--accent)}
+.person.on .box svg{opacity:1;stroke:#1a1300}
+.person .name{flex:1;font-weight:500;display:flex;align-items:center;gap:10px;min-width:0}
+.person .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person .tag{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.person.archived .name{color:var(--muted)}
+.panel-foot{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:6px}
+.panel-foot .input{flex:1}
+.panel.locked .checklist{opacity:.55}
+
+/* Roster */
+.roster-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.roster-head h2{font-size:42px}
+.add-form{display:grid;grid-template-columns:minmax(0,1fr) 130px 110px auto;gap:8px;padding:14px;margin-bottom:18px;align-items:end}
+.add-form .field{display:flex;flex-direction:column;gap:5px}
+.add-form .input{width:100%}
+.mlist{display:flex;flex-direction:column}
+.mrow{display:grid;grid-template-columns:38px minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.mrow:first-child{border-top:0}
+.mrow .who{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow .sub{font-size:13px;color:var(--muted)}
+.mrow .stat b{font-family:var(--display);font-size:22px;font-weight:700;margin-right:5px}
+.mrow .stat{font-size:13px;color:var(--muted)}
+.mrow.archived .who{color:var(--muted)}
+.mrow .acts{display:flex;gap:4px}
+.editrow{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:4px 0 2px}
+.editrow .input{min-width:120px}
+.section-title{display:flex;align-items:baseline;gap:10px;margin:22px 0 8px}
+.section-title h3{font-size:20px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+/* Summary */
+.sum-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.sum-head h2{font-size:42px}
+.sum-head .right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.tile{padding:14px 16px 12px}
+.tile .label{margin-bottom:6px}
+.tile .v{font-family:var(--display);font-size:38px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:16px;color:var(--muted);font-weight:600;margin-left:4px}
+.tile .sub{font-size:12px;color:var(--muted);margin-top:6px}
+.table{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:12px 14px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:middle}
+tr.mem{cursor:pointer}
+tr.mem:hover td{background:var(--surface-2)}
+tr.mem.open td{background:var(--surface-2)}
+td .who{display:flex;align-items:center;gap:10px;font-weight:600}
+td .big{font-family:var(--display);font-size:22px;font-weight:700}
+.pct{display:inline-flex;align-items:center;gap:8px}
+.pct .track{width:70px;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden}
+.pct .fill{height:100%;background:var(--accent);border-radius:3px}
+.wk{display:inline-flex;gap:2px;align-items:flex-end;height:22px}
+.wk i{display:block;width:7px;background:var(--surface-3);border-radius:1px;min-height:2px}
+.wk i.hot{background:var(--accent)}
+.streak{font-weight:600}
+.streak.zero{color:var(--faint);font-weight:400}
+tr.detail td{background:var(--surface-2);padding:6px 14px 16px 62px;border-top:0}
+.months{display:flex;flex-direction:column;gap:8px}
+.mon{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:baseline}
+.mon .mn{font-family:var(--display);font-size:16px;font-weight:700;color:var(--muted)}
+.datechips{display:flex;flex-wrap:wrap;gap:4px}
+.datechip{font-size:12px;padding:3px 8px;border-radius:5px;background:var(--surface);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.datechip small{color:var(--muted);margin-right:3px}
+.wkleg{display:flex;gap:10px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+.wkleg b{color:var(--ink)}
+
+/* Technique of the day */
+.day .capn{font-size:11px;line-height:1.25;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.day.future.planned{border-style:solid;color:var(--ink)}
+.day.future .capn{color:var(--accent-ink)}
+.lesson{border-bottom:1px solid var(--line);padding:12px 18px 13px;display:flex;flex-direction:column;gap:7px;position:relative}
+.lesson.add{flex-direction:row;align-items:center;gap:10px;width:100%;text-align:left;color:var(--muted);font-weight:500;font-size:14px}
+.lesson.add:hover{color:var(--ink);background:var(--surface-2)}
+.lesson.add .plus{width:22px;height:22px;border-radius:6px;border:1.5px dashed var(--line-strong);display:grid;place-items:center;font-size:16px;line-height:1;flex:none}
+.lesson-title{font-weight:600;line-height:1.3;padding-right:56px;text-wrap:balance}
+.lesson-tags{display:flex;flex-wrap:wrap;gap:4px}
+.ltag{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent-ink)}
+.lesson-edit{position:absolute;right:10px;top:9px}
+.lesson.editing .input{width:100%}
+.label.small{margin-top:4px}
+.chips.tiny .chip{padding:3px 9px;font-size:12px}
+.chips.static .chip{cursor:default}
+.chips.static .chip b{color:var(--ink);margin-left:2px}
+.lesson-acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.person .tag.away{color:var(--accent-ink);background:var(--accent-soft);padding:2px 6px;border-radius:4px;white-space:nowrap}
+.exposure{font-size:13px;color:var(--muted);margin:2px 0 10px}
+.exposure b{color:var(--ink)}
+.datechip.has-lesson{border-bottom:2px solid var(--accent)}
+
+/* Fading + curriculum */
+.section-title .chips{margin-left:auto}
+.fading{display:flex;flex-direction:column}
+.frow{display:grid;grid-template-columns:minmax(0,1.2fr) auto minmax(0,2fr) auto;gap:14px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.frow:first-child{border-top:0}
+.frow .who{display:flex;align-items:center;gap:10px;font-weight:600;min-width:0}
+.frow .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .stat{font-size:13px;color:var(--muted);white-space:nowrap}
+.frow .stat b{font-family:var(--display);font-size:22px;font-weight:700;margin-right:4px;color:var(--danger)}
+.frow .sub{font-size:13px;color:var(--muted)}
+.empty.small{padding:18px 16px}
+.curr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:10px;align-items:start}
+.pos{padding:14px 16px 16px}
+.pos .label{margin-bottom:6px}
+.prow{display:grid;grid-template-columns:96px 1fr 26px;gap:10px;align-items:center;padding:3px 0;font-size:13px}
+.prow .pn{color:var(--ink);font-weight:500}
+.prow.gap .pn{color:var(--faint);font-weight:400}
+.ptrack{display:block;height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden}
+.pfill{display:block;height:100%;background:var(--accent);border-radius:4px}
+.pc{text-align:right;font-weight:600;color:var(--muted)}
+.techs table{min-width:0}
+.techs td{padding:9px 14px}
+
+/* Sample banner + toast */
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;margin-bottom:16px;background:var(--accent-soft);border:1px solid var(--accent-ring);border-radius:10px;font-size:14px;color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+.toast.show{opacity:1}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+
+@media (max-width: 900px){
+  .cal-layout{grid-template-columns:1fr}
+  .panel{position:static;max-height:none}
+  .checklist{max-height:420px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .add-form{grid-template-columns:1fr 1fr}
+  .add-form .field:first-child{grid-column:1 / -1}
+  .mrow{grid-template-columns:38px minmax(0,1fr) auto;gap:10px}
+  .mrow .stat{display:none}
+  .mrow .acts{grid-column:3}
+  .curr{grid-template-columns:1fr}
+  .frow{grid-template-columns:minmax(0,1fr) auto auto}
+  .frow .sub{grid-column:1 / -1}
+  .section-title{flex-wrap:wrap}
+}
+@media (max-width: 560px){
+  .day{min-height:64px;padding:5px 6px 6px}
+  .dnum{font-size:16px}
+  .dots .dot{width:6px;height:6px}
+  .cal-head h2,.roster-head h2,.sum-head h2{font-size:34px}
+  .day .capn{display:none}
+  .tile .v{font-size:30px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+
+<div class="gate" id="gate" hidden></div>
+<input type="file" id="restore-file" accept="application/json,.json" hidden>
+
+<div class="app" id="app" hidden>
+  <header class="top">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"><i></i></div>
+      <div>
+        <h1>Mat Time<span class="coach">Coach</span></h1>
+        <div class="status" id="status">Connecting…</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Views">
+      <button class="tab active" data-view="calendar">Calendar</button>
+      <button class="tab" data-view="roster">Roster</button>
+      <button class="tab" data-view="summary">Summary</button>
+    </nav>
+    <div class="me" id="me"></div>
+  </header>
+  <div id="banner"></div>
+  <main id="main"><div class="loading">Loading attendance…</div></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<dialog class="pass" id="pass-dialog">
+  <form id="pass-form" method="dialog">
+    <h3>Change password</h3>
+    <label><span class="label">Current password</span><input class="input" name="cur" type="password" autocomplete="current-password" required></label>
+    <label><span class="label">New password</span><input class="input" name="next" type="password" autocomplete="new-password" minlength="6" required></label>
+    <label><span class="label">Repeat new password</span><input class="input" name="again" type="password" autocomplete="new-password" minlength="6" required></label>
+    <div class="err" id="pass-err" role="alert" style="color:var(--danger);font-size:13px;min-height:1.2em"></div>
+    <div class="acts"><button class="btn sm quiet" type="button" data-act="pass-cancel">Cancel</button><button class="btn sm primary" type="submit" value="save">Save</button></div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const dow = d => (d.getDay() + 6) % 7; // Monday = 0
+const mondayOf = d => addDays(d, -dow(d));
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const BELTS = ['white', 'blue', 'purple', 'brown', 'black'];
+const POSITIONS = ['Closed guard', 'Half guard', 'Open guard', 'Mount', 'Side control', 'Back', 'Turtle', 'Standing'];
+const TYPES = ['Sweep', 'Submission', 'Pass', 'Escape', 'Takedown', 'Drill', 'Sparring'];
+const hasLesson = day => !!(day && day.lesson && (day.lesson.title || (day.lesson.positions || []).length || (day.lesson.types || []).length));
+const lessonLine = l => [l.title, ...(l.positions || []), ...(l.types || [])].filter(Boolean).join(' · ');
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtShort = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`; };
+const fmtLong = s => { const d = parse(s); return `${DOW_LONG[dow(d)]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtMonthYear = s => { const d = parse(s); return `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getFullYear()}`; };
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+
+const TODAY = iso(new Date());
+const todayD = parse(TODAY);
+
+/* ---------- state ---------- */
+const state = {
+  members: {}, days: {},
+  view: 'calendar',
+  cursor: new Date(todayD.getFullYear(), todayD.getMonth(), 1),
+  selected: TODAY,
+  q: '',
+  range: 'month',
+  openMember: null,
+  editing: null,
+  lessonEdit: false,
+  lessonDraft: null,
+  fadeDays: 14,
+  mode: 'connecting',
+  ready: false,
+};
+let backend = null;
+let downloads = null;
+let toastTimer = null;
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+function setStatus() {
+  const el = $('#status');
+  el.className = 'status';
+  if (state.mode === 'db') { el.classList.add('live'); el.textContent = 'Shared · live for everyone at the gym'; }
+  else if (state.mode === 'local') { el.classList.add('local'); el.textContent = 'Saved on this device · encrypted'; }
+  else el.textContent = 'Connecting…';
+}
+
+/* ---------- backends ---------- */
+function handleErr(e) {
+  const code = e && e.code;
+  if (code === 'quota_exceeded') toast('Storage is full. Delete old data before adding more.');
+  else if (code === 'resource_exhausted') toast('Too many changes at once. Wait a moment and try again.');
+  else if (code === 'revoked' || code === 'not_granted') toast('You no longer have access to save changes.');
+  else toast('Could not save that change. Try again.');
+  console.error(e);
+}
+
+function setupDb(db) {
+  state.mode = 'db';
+  const members = db.collection('members');
+  const att = db.collection('attendance');
+  let gotM = false, gotA = false;
+  const check = () => { if (gotM && gotA) state.ready = true; render(); };
+  unsubs.push(members.onSnapshot(snap => {
+    const m = {}; snap.docs.forEach(d => { m[d.id] = d.data(); });
+    state.members = m; gotM = true; check();
+  }, e => { handleErr(e); state.ready = true; render(); }));
+  unsubs.push(att.onSnapshot(snap => {
+    const a = {}; snap.docs.forEach(d => { a[d.id] = d.data(); });
+    state.days = a; gotA = true; check();
+  }, e => { handleErr(e); state.ready = true; render(); }));
+  backend = {
+    kind: 'db',
+    persistMember: (id, data) => members.doc(id).set(data).catch(handleErr),
+    deleteMember: id => members.doc(id).delete().catch(handleErr),
+    persistDay: (date, data) => (data ? att.doc(date).set(data) : att.doc(date).delete()).catch(handleErr),
+  };
+  setStatus();
+}
+
+const DATA_KEY = 'mat-time-v2', LEGACY_KEY = 'mat-time-v1';
+async function setupLocal() {
+  state.mode = 'local';
+  let data = null, migrated = false;
+  try {
+    const raw = localStorage.getItem(DATA_KEY);
+    if (raw) data = await decryptJSON(cryptoKey, JSON.parse(raw));
+    else {
+      const legacy = localStorage.getItem(LEGACY_KEY);
+      if (legacy) { data = JSON.parse(legacy); migrated = true; }
+    }
+  } catch (e) { console.error(e); toast('Could not read the data saved on this device.'); }
+  if (data) { state.members = data.members || {}; state.days = data.days || {}; }
+  let saving = null;
+  const save = () => {
+    // Encrypt the whole store with the coach's key; nothing readable is left in the browser.
+    saving = encryptJSON(cryptoKey, { members: state.members, days: state.days })
+      .then(rec => { localStorage.setItem(DATA_KEY, JSON.stringify(rec)); localStorage.removeItem(LEGACY_KEY); })
+      .catch(e => { console.error(e); toast('Could not save on this device.'); });
+    return saving;
+  };
+  backend = { kind: 'local', persistMember: save, deleteMember: save, persistDay: save, flush: () => saving };
+  if (migrated) save();
+  state.ready = true;
+  setStatus();
+  render();
+}
+
+let unsubs = [];
+function teardown() {
+  unsubs.forEach(u => { try { u(); } catch (e) { /* ignore */ } });
+  unsubs = []; backend = null;
+  state.members = {}; state.days = {}; state.ready = false; state.lessonEdit = false; state.lessonDraft = null; state.editing = null; state.openMember = null; state.view = 'calendar';
+  $('#main').innerHTML = '';
+}
+async function init() {
+  const canUse = window.claude && typeof window.claude.use === 'function';
+  let db = null;
+  if (canUse) {
+    try { db = await window.claude.use('db'); } catch (e) { db = null; }
+    try { downloads = await window.claude.use('downloads'); } catch (e) { downloads = null; }
+  }
+  if (db) setupDb(db); else setupLocal();
+}
+
+/* ---------- actions ---------- */
+function saveMember(id, data) { state.members[id] = data; render(); backend.persistMember(id, data); }
+function deleteMember(id) { delete state.members[id]; if (state.openMember === id) state.openMember = null; render(); backend.deleteMember(id); }
+function setDay(date, present, lessonPatch) {
+  const prev = state.days[date] || {};
+  const next = { ...prev, present, updatedAt: new Date().toISOString() };
+  if (lessonPatch !== undefined) { if (lessonPatch) next.lesson = lessonPatch; else delete next.lesson; }
+  delete next.example;
+  if (present.length || hasLesson(next)) state.days[date] = next; else delete state.days[date];
+  render();
+  backend.persistDay(date, state.days[date] || null);
+}
+function setLesson(date, lesson) {
+  const present = [...((state.days[date] && state.days[date].present) || [])];
+  setDay(date, present, lesson);
+}
+function pastTitles() {
+  const seen = new Map();
+  Object.keys(state.days).sort().forEach(d => { const l = state.days[d].lesson; if (l && l.title) seen.set(l.title.trim().toLowerCase(), l.title.trim()); });
+  return [...seen.values()].reverse();
+}
+function daysAway(id) {
+  const lt = lifetime(id);
+  if (!lt.last || lt.n < 3) return null;
+  return { away: Math.round((todayD - parse(lt.last)) / 86400000), last: lt.last, total: lt.n };
+}
+function togglePresent(date, id) {
+  if (date > TODAY) return;
+  const set = new Set((state.days[date] && state.days[date].present) || []);
+  set.has(id) ? set.delete(id) : set.add(id);
+  setDay(date, [...set]);
+}
+function addMember(name, belt = 'white', stripes = 0) {
+  name = name.trim(); if (!name) return null;
+  const dup = Object.values(state.members).find(m => m.name.toLowerCase() === name.toLowerCase());
+  if (dup) { toast(`${dup.name} is already on the roster.`); return null; }
+  const id = uid();
+  saveMember(id, { name, belt, stripes: Number(stripes) || 0, active: true, createdAt: TODAY });
+  return id;
+}
+function removeSampleData() {
+  Object.entries(state.members).forEach(([id, m]) => { if (m.example) { delete state.members[id]; backend.deleteMember(id); } });
+  Object.entries(state.days).forEach(([d, day]) => { if (day.example) { delete state.days[d]; backend.persistDay(d, null); } });
+  if (backend.kind === 'local') backend.persistDay();
+  render();
+  toast('Sample data removed. The roster is yours.');
+}
+function loadSampleData() {
+  const s = makeSample();
+  Object.assign(state.members, s.members); Object.assign(state.days, s.days);
+  backend.persistDay(); render();
+}
+function makeSample() {
+  let seed = 7; const rnd = () => (seed = (seed * 48271) % 2147483647) / 2147483647;
+  const people = [
+    ['Nikos Papadakis', 'purple', 2, .8], ['Elena Vasquez', 'blue', 3, .7], ['Tom Reilly', 'white', 4, .9],
+    ['Sara Lindqvist', 'brown', 0, .6], ['Yiannis Kostas', 'white', 1, .45], ['Marta Oliveira', 'blue', 0, .55],
+    ['Dimitri Alexiou', 'black', 1, .5], ['Priya Nair', 'white', 2, .35],
+  ];
+  const members = {}, ids = [];
+  people.forEach(([name, belt, stripes, p], i) => { const id = 'sample-' + (i + 1); ids.push([id, p]); members[id] = { name, belt, stripes, active: true, createdAt: '2026-07-01', example: true }; });
+  const days = {};
+  const lessons = [
+    { title: 'Hip bump sweep, kimura from the failed sweep', positions: ['Closed guard'], types: ['Sweep', 'Submission'] },
+    { title: 'Knee cut pass against half guard', positions: ['Half guard'], types: ['Pass'] },
+    { title: 'Elbow-knee escape from mount', positions: ['Mount'], types: ['Escape'] },
+    { title: 'Bow and arrow choke', positions: ['Back'], types: ['Submission'] },
+    { title: 'Single leg to double leg chain', positions: ['Standing'], types: ['Takedown'] },
+    { title: 'Toreando pass into knee on belly', positions: ['Open guard', 'Side control'], types: ['Pass', 'Drill'] },
+    { title: 'Positional rounds: escape side control', positions: ['Side control'], types: ['Escape', 'Sparring'] },
+    { title: 'Scissor sweep, cross collar choke', positions: ['Closed guard'], types: ['Sweep', 'Submission'] },
+    { title: 'Back take from turtle', positions: ['Turtle', 'Back'], types: ['Drill'] },
+  ];
+  let li = 0;
+  const classDays = [0, 1, 2, 3, 5]; // Mon–Thu and Saturday
+  for (let d = addDays(todayD, -42); d <= todayD; d = addDays(d, 1)) {
+    if (!classDays.includes(dow(d))) continue;
+    const present = ids.filter(([id, p]) => rnd() < p && !(id === 'sample-8' && d > addDays(todayD, -17))).map(([id]) => id);
+    if (present.length) days[iso(d)] = { present, lesson: lessons[li++ % lessons.length], updatedAt: new Date().toISOString(), example: true };
+  }
+  return { members, days };
+}
+
+/* ---------- stats ---------- */
+function rangeBounds(r) {
+  const t = todayD;
+  if (r === 'month') return [iso(new Date(t.getFullYear(), t.getMonth(), 1)), TODAY];
+  if (r === '30') return [iso(addDays(t, -29)), TODAY];
+  if (r === '90') return [iso(addDays(t, -89)), TODAY];
+  if (r === 'year') return [iso(new Date(t.getFullYear(), 0, 1)), TODAY];
+  return ['0000-01-01', TODAY];
+}
+const RANGE_LABEL = { month: 'this month', '30': 'the last 30 days', '90': 'the last 90 days', year: 'this year', all: 'all time' };
+
+function computeStats(r) {
+  const [a, b] = rangeBounds(r);
+  const known = id => !!state.members[id];
+  const classDays = Object.keys(state.days).filter(d => d >= a && d <= b && ((state.days[d].present || []).some(known) || hasLesson(state.days[d]))).sort();
+  const per = {};
+  Object.keys(state.members).forEach(id => { per[id] = { sessions: 0, dates: [], dow: [0, 0, 0, 0, 0, 0, 0], last: null }; });
+  const dowTotals = [0, 0, 0, 0, 0, 0, 0];
+  let checkins = 0;
+  classDays.forEach(d => {
+    const w = dow(parse(d));
+    (state.days[d].present || []).forEach(id => {
+      if (!per[id]) return;
+      per[id].sessions++; per[id].dates.push(d); per[id].dow[w]++; per[id].last = d; checkins++; dowTotals[w]++;
+    });
+  });
+  const active = Object.values(per).filter(p => p.sessions > 0).length;
+  const busiest = dowTotals.some(n => n) ? dowTotals.indexOf(Math.max(...dowTotals)) : -1;
+  // curriculum
+  const posCounts = {}, typeCounts = {}, techs = {};
+  POSITIONS.forEach(p => { posCounts[p] = 0; }); TYPES.forEach(t => { typeCounts[t] = 0; });
+  const lessonDays = classDays.filter(d => hasLesson(state.days[d]));
+  lessonDays.forEach(d => {
+    const l = state.days[d].lesson;
+    (l.positions || []).forEach(p => { posCounts[p] = (posCounts[p] || 0) + 1; });
+    (l.types || []).forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1; });
+    if (l.title && l.title.trim()) {
+      const k = l.title.trim().toLowerCase();
+      const t = techs[k] = techs[k] || { title: l.title.trim(), count: 0, last: null, positions: new Set() };
+      t.count++; t.last = d; (l.positions || []).forEach(p => t.positions.add(p));
+    }
+  });
+  const techniques = Object.values(techs).sort((x, y) => y.count - x.count || (y.last > x.last ? 1 : -1));
+  return { classDays, per, checkins, active, busiest, dowTotals, avg: classDays.length ? checkins / classDays.length : 0, lessonDays, posCounts, typeCounts, techniques };
+}
+function fadingStudents(threshold) {
+  const out = [];
+  Object.entries(state.members).forEach(([id, m]) => {
+    if (m.active === false) return;
+    const a = daysAway(id);
+    if (!a || a.away < threshold) return;
+    const from = iso(addDays(parse(a.last), -55));
+    const n = Object.keys(state.days).filter(d => d >= from && d <= a.last && (state.days[d].present || []).includes(id)).length;
+    out.push({ id, m, away: a.away, last: a.last, total: a.total, perWeek: n / 8 });
+  });
+  return out.sort((x, y) => y.perWeek - x.perWeek || x.away - y.away);
+}
+function weekStreak(id) {
+  const weeks = new Set();
+  Object.keys(state.days).forEach(d => { if ((state.days[d].present || []).includes(id)) weeks.add(iso(mondayOf(parse(d)))); });
+  let wk = mondayOf(todayD);
+  if (!weeks.has(iso(wk))) wk = addDays(wk, -7);
+  let n = 0;
+  while (weeks.has(iso(wk))) { n++; wk = addDays(wk, -7); }
+  return n;
+}
+function lifetime(id) {
+  let n = 0, last = null;
+  Object.keys(state.days).sort().forEach(d => { if ((state.days[d].present || []).includes(id)) { n++; last = d; } });
+  return { n, last };
+}
+
+/* ---------- render ---------- */
+function beltHTML(m) {
+  const belt = BELTS.includes(m.belt) ? m.belt : 'white';
+  const st = Math.min(4, Math.max(0, Number(m.stripes) || 0));
+  const title = `${cap(belt)} belt${st ? `, ${st} stripe${st > 1 ? 's' : ''}` : ''}`;
+  return `<span class="belt b-${belt}" title="${title}" aria-label="${title}"><span class="bar">${'<i></i>'.repeat(st)}</span></span>`;
+}
+function beltText(m) {
+  const st = Number(m.stripes) || 0;
+  return `${cap(m.belt || 'white')} belt${st ? ` · ${st} stripe${st > 1 ? 's' : ''}` : ''}`;
+}
+const sortedMembers = (filterFn = () => true) =>
+  Object.entries(state.members).filter(([, m]) => filterFn(m)).sort((x, y) => x[1].name.localeCompare(y[1].name));
+
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === state.view));
+  renderBanner();
+  const main = $('#main');
+  if (!state.ready) { main.innerHTML = '<div class="loading">Loading attendance…</div>'; return; }
+  if (state.view === 'calendar') main.innerHTML = renderCalendarView();
+  else if (state.view === 'roster') main.innerHTML = renderRoster();
+  else main.innerHTML = renderSummary();
+}
+
+function renderBanner() {
+  const hasSample = Object.values(state.members).some(m => m.example);
+  $('#banner').innerHTML = hasSample
+    ? `<div class="banner"><span>You're looking at <b>sample people and attendance</b> so you can see how the log works. Remove them when you're ready to add your own students.</span><button class="btn sm" data-act="remove-sample">Remove sample data</button></div>`
+    : '';
+}
+
+/* Calendar */
+function renderCalendarView() {
+  return `<div class="cal-layout"><section>${renderCalendar()}</section>${renderDayPanel()}</div>`;
+}
+function renderCalendar() {
+  const y = state.cursor.getFullYear(), m = state.cursor.getMonth();
+  const first = new Date(y, m, 1), lead = dow(first);
+  const daysIn = new Date(y, m + 1, 0).getDate();
+  const known = id => !!state.members[id];
+  let classes = 0, checkins = 0;
+  const cells = [];
+  for (let i = 0; i < lead; i++) cells.push('<div class="day blank" aria-hidden="true"></div>');
+  for (let d = 1; d <= daysIn; d++) {
+    const date = iso(new Date(y, m, d));
+    const day = state.days[date];
+    const present = ((day && day.present) || []).filter(known);
+    const future = date > TODAY;
+    const lesson = hasLesson(day) ? day.lesson : null;
+    if (present.length || lesson) { classes++; checkins += present.length; }
+    const cls = ['day', future && 'future', date === TODAY && 'today', date === state.selected && 'selected', lesson && 'planned'].filter(Boolean).join(' ');
+    const dots = present.slice(0, 8).map(id => `<span class="dot b-${state.members[id].belt || 'white'}" title="${esc(state.members[id].name)}"></span>`).join('')
+      + (present.length > 8 ? `<span class="more">+${present.length - 8}</span>` : '');
+    const caption = lesson ? `<div class="capn" title="${esc(lessonLine(lesson))}">${esc(lesson.title || (lesson.positions || []).concat(lesson.types || []).join(', '))}</div>` : '';
+    cells.push(`<button class="${cls}" data-date="${date}" aria-label="${fmtLong(date)}, ${present.length} present${lesson ? ', ' + esc(lessonLine(lesson)) : ''}">
+      <div class="row"><span class="dnum">${d}</span>${present.length ? `<span class="count num">${present.length}</span>` : ''}</div>
+      ${caption}
+      <div class="dots">${dots}</div></button>`);
+  }
+  const isThisMonth = y === todayD.getFullYear() && m === todayD.getMonth();
+  return `
+    <div class="cal-head">
+      <h2>${MONTHS[m]}<span>${y}</span></h2>
+      <div class="cal-nav">
+        <button class="btn" data-nav="-1" aria-label="Previous month">‹</button>
+        <button class="btn" data-nav="today" ${isThisMonth ? 'disabled' : ''}>Today</button>
+        <button class="btn" data-nav="1" aria-label="Next month">›</button>
+      </div>
+    </div>
+    <div class="month-meta"><span><b class="num">${classes}</b>classes logged</span><span><b class="num">${checkins}</b>check-ins</span><span><b class="num">${classes ? (checkins / classes).toFixed(1) : '–'}</b>avg on the mat</span></div>
+    <div class="cal-grid">${DOW.map(d => `<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>`;
+}
+function renderDayPanel() {
+  const date = state.selected;
+  const present = new Set((state.days[date] && state.days[date].present) || []);
+  const locked = date > TODAY;
+  const q = state.q.trim().toLowerCase();
+  const rows = sortedMembers().filter(([id, m]) => (m.active !== false || present.has(id)) && (!q || m.name.toLowerCase().includes(q)));
+  const total = Object.keys(state.members).length;
+  const awayTag = id => {
+    if (date !== TODAY || present.has(id)) return '';
+    const a = daysAway(id);
+    return a && a.away >= state.fadeDays ? `<span class="tag away" title="Last class ${fmtLong(a.last)}">away ${a.away}d</span>` : '';
+  };
+  const body = total === 0
+    ? `<div class="empty"><p>No one on the roster yet. Add your first student below and tick them off for today.</p>${backend.kind === 'local' ? '<button class="btn sm" data-act="load-sample">Load sample data</button>' : ''}</div>`
+    : rows.length === 0
+      ? `<div class="empty"><p>No one matches “${esc(state.q)}”.</p></div>`
+      : rows.map(([id, m]) => `
+        <button class="person ${present.has(id) ? 'on' : ''} ${m.active === false ? 'archived' : ''}" data-toggle="${id}" role="checkbox" aria-checked="${present.has(id)}" ${locked ? 'disabled' : ''}>
+          <span class="box"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg></span>
+          <span class="name">${beltHTML(m)}<span>${esc(m.name)}</span>${m.active === false ? '<span class="tag">archived</span>' : awayTag(id)}</span>
+        </button>`).join('');
+
+  const day = state.days[date];
+  const lesson = hasLesson(day) ? day.lesson : null;
+  const draft = state.lessonDraft || { title: '', positions: [], types: [] };
+  const lessonBlock = state.lessonEdit ? `
+    <form class="lesson editing" id="lesson-form">
+      <div class="label">Technique of the day</div>
+      <input class="input" name="title" list="past-lessons" placeholder="What did you teach? e.g. Hip bump sweep" value="${esc(draft.title)}" autocomplete="off" autofocus>
+      <datalist id="past-lessons">${pastTitles().map(t => `<option value="${esc(t)}">`).join('')}</datalist>
+      <div class="label small">Position</div>
+      <div class="chips tiny">${POSITIONS.map(p => `<button type="button" class="chip ${draft.positions.includes(p) ? 'active' : ''}" data-pos="${esc(p)}">${p}</button>`).join('')}</div>
+      <div class="label small">Type</div>
+      <div class="chips tiny">${TYPES.map(t => `<button type="button" class="chip ${draft.types.includes(t) ? 'active' : ''}" data-type="${esc(t)}">${t}</button>`).join('')}</div>
+      <div class="lesson-acts"><button class="btn sm primary" type="submit">Save lesson</button><button class="btn sm quiet" type="button" data-lesson="cancel">Cancel</button>${lesson ? '<button class="btn sm quiet danger" type="button" data-lesson="clear">Remove</button>' : ''}</div>
+    </form>`
+    : lesson ? `<div class="lesson">
+      <div class="label">${locked ? 'Planned technique' : 'Technique of the day'}</div>
+      ${lesson.title ? `<div class="lesson-title">${esc(lesson.title)}</div>` : ''}
+      ${(lesson.positions || []).length || (lesson.types || []).length ? `<div class="lesson-tags">${[...(lesson.positions || []), ...(lesson.types || [])].map(t => `<span class="ltag">${esc(t)}</span>`).join('')}</div>` : ''}
+      <button class="btn sm quiet lesson-edit" data-lesson="edit">Edit</button>
+    </div>`
+    : `<button class="lesson add" data-lesson="edit"><span class="plus">+</span>${locked ? 'Plan the technique for this class' : 'Add technique of the day'}</button>`;
+
+  return `<aside class="card panel ${locked ? 'locked' : ''}" aria-label="Attendance for selected day">
+    <div class="panel-head">
+      <div class="label">${date === TODAY ? 'Today' : locked ? 'Upcoming' : 'Class day'}</div>
+      <h3>${fmtLong(date)}</h3>
+      <div class="sub"><span>${locked ? 'Attendance opens on the day. You can plan the lesson now.' : 'Tap a name to mark them present.'}</span><b class="num">${[...present].filter(id => state.members[id]).length}</b></div>
+    </div>
+    ${lessonBlock}
+    ${total > 8 ? `<div class="panel-tools"><input class="input" id="q" type="search" placeholder="Find a name…" value="${esc(state.q)}" autocomplete="off"></div>` : ''}
+    <div class="checklist">${body}</div>
+    ${locked ? '' : `<form class="panel-foot" id="quick-add"><input class="input" name="name" placeholder="Add a new person…" autocomplete="off" required><button class="btn" type="submit">Add</button></form>`}
+  </aside>`;
+}
+
+/* Roster */
+function renderRoster() {
+  const active = sortedMembers(m => m.active !== false);
+  const archived = sortedMembers(m => m.active === false);
+  const row = ([id, m]) => {
+    const lt = lifetime(id);
+    const editing = state.editing === id;
+    return `<div class="mrow ${m.active === false ? 'archived' : ''}" data-id="${id}">
+      ${beltHTML(m)}
+      <div><div class="who">${esc(m.name)}</div><div class="sub">${beltText(m)}${m.createdAt ? ` · since ${fmtMonthYear(m.createdAt)}` : ''}</div></div>
+      <div class="stat"><b class="num">${lt.n}</b>${lt.n === 1 ? 'class' : 'classes'} all time</div>
+      <div class="stat">${lt.last ? `Last on the mat <b class="num" style="font-size:16px">${fmtShort(lt.last)}</b>` : '<span class="faint">Never checked in</span>'}</div>
+      <div class="acts">
+        <button class="btn sm quiet" data-edit="${id}">${editing ? 'Close' : 'Edit'}</button>
+        <button class="btn sm quiet" data-archive="${id}">${m.active === false ? 'Restore' : 'Archive'}</button>
+      </div>
+      ${editing ? `<form class="editrow" data-editform="${id}">
+        <input class="input" name="name" value="${esc(m.name)}" required aria-label="Name">
+        <select class="input" name="belt" aria-label="Belt">${BELTS.map(b => `<option value="${b}" ${m.belt === b ? 'selected' : ''}>${cap(b)} belt</option>`).join('')}</select>
+        <select class="input" name="stripes" aria-label="Stripes">${[0, 1, 2, 3, 4].map(n => `<option value="${n}" ${(m.stripes || 0) === n ? 'selected' : ''}>${n} stripe${n === 1 ? '' : 's'}</option>`).join('')}</select>
+        <button class="btn sm primary" type="submit">Save</button>
+        <button class="btn sm danger quiet" type="button" data-delete="${id}">Delete permanently</button>
+      </form>` : ''}
+    </div>`;
+  };
+  return `
+    <div class="roster-head"><h2>Roster</h2><div class="muted">${active.length} training${archived.length ? ` · ${archived.length} archived` : ''}</div></div>
+    <form class="card add-form" id="add-form">
+      <div class="field"><label class="label" for="af-name">Name</label><input class="input" id="af-name" name="name" placeholder="Full name" required autocomplete="off"></div>
+      <div class="field"><label class="label" for="af-belt">Belt</label><select class="input" id="af-belt" name="belt">${BELTS.map(b => `<option value="${b}">${cap(b)}</option>`).join('')}</select></div>
+      <div class="field"><label class="label" for="af-stripes">Stripes</label><select class="input" id="af-stripes" name="stripes">${[0, 1, 2, 3, 4].map(n => `<option value="${n}">${n}</option>`).join('')}</select></div>
+      <button class="btn primary" type="submit">Add to roster</button>
+    </form>
+    ${active.length ? `<div class="card mlist">${active.map(row).join('')}</div>`
+      : `<div class="card empty"><p>The roster is empty. Add the people who train with you, then log who shows up from the calendar.</p>${backend.kind === 'local' ? '<button class="btn sm" data-act="load-sample">Load sample data</button>' : ''}</div>`}
+    ${archived.length ? `<div class="section-title"><h3>Archived</h3><span class="muted" style="font-size:13px">Hidden from the daily check-in, history kept.</span></div><div class="card mlist">${archived.map(row).join('')}</div>` : ''}`;
+}
+
+/* Summary */
+function renderSummary() {
+  const s = computeStats(state.range);
+  const [a] = rangeBounds(state.range);
+  const rows = Object.entries(s.per)
+    .filter(([id]) => state.members[id])
+    .sort((x, y) => y[1].sessions - x[1].sessions || state.members[x[0]].name.localeCompare(state.members[y[0]].name));
+  const nClasses = s.classDays.length;
+  const canExport = !!downloads || !(window.claude && window.claude.use);
+  const firstLogged = Object.keys(state.days).sort()[0];
+  const rangeNote = state.range === 'all' ? (firstLogged ? `since ${fmtShort(firstLogged)} ${parse(firstLogged).getFullYear()}` : '') : `since ${fmtShort(a)}`;
+
+  const tr = ([id, p]) => {
+    const m = state.members[id];
+    const pct = nClasses ? Math.round(p.sessions / nClasses * 100) : 0;
+    const max = Math.max(1, ...p.dow);
+    const streak = weekStreak(id);
+    const open = state.openMember === id;
+    return `<tr class="mem ${open ? 'open' : ''} ${m.active === false ? 'archived' : ''}" data-open="${id}" tabindex="0" aria-expanded="${open}">
+      <td><div class="who">${beltHTML(m)}<span>${esc(m.name)}</span>${m.active === false ? '<span class="tag faint" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em">archived</span>' : ''}</div></td>
+      <td class="r"><span class="big num">${p.sessions}</span></td>
+      <td><span class="pct"><span class="track"><span class="fill" style="width:${pct}%"></span></span><span class="num muted" style="font-size:13px">${pct}%</span></span></td>
+      <td><span class="wk" title="${DOW.map((d, i) => `${d} ${p.dow[i]}`).join(', ')}">${p.dow.map((n, i) => `<i class="${n && n === max ? 'hot' : ''}" style="height:${Math.max(2, Math.round(n / max * 22))}px" title="${DOW[i]}: ${n}"></i>`).join('')}</span></td>
+      <td class="r"><span class="streak ${streak ? '' : 'zero'} num">${streak ? `${streak} wk${streak > 1 ? 's' : ''}` : '—'}</span></td>
+      <td class="r num muted">${p.last ? fmtShort(p.last) : '—'}</td>
+    </tr>
+    ${open ? `<tr class="detail"><td colspan="6">${renderDetail(p, s)}</td></tr>` : ''}`;
+  };
+
+  const fading = fadingStudents(state.fadeDays);
+  const fadingHTML = `
+    <div class="section-title">
+      <h3>Fading students</h3>
+      <span class="muted" style="font-size:13px">Regulars who haven't trained for</span>
+      <div class="chips tiny">${[14, 21, 30].map(n => `<button class="chip ${state.fadeDays === n ? 'active' : ''}" data-fade="${n}">${n} days</button>`).join('')}</div>
+    </div>
+    <div class="card fading">${fading.length ? fading.map(f => `
+      <div class="frow">
+        <div class="who">${beltHTML(f.m)}<span>${esc(f.m.name)}</span></div>
+        <div class="stat"><b class="num">${f.away}</b>days away</div>
+        <div class="sub">Last class ${fmtShort(f.last)} · was training ${f.perWeek.toFixed(1)}× a week · ${f.total} classes all time</div>
+        <button class="btn sm quiet" data-goto="${f.last}">Open last class</button>
+      </div>`).join('')
+      : `<div class="empty small"><p>No one has gone quiet. Every regular has trained in the last ${state.fadeDays} days.</p></div>`}</div>`;
+
+  const maxPos = Math.max(1, ...Object.values(s.posCounts));
+  const curriculumHTML = `
+    <div class="section-title">
+      <h3>Curriculum</h3>
+      <span class="muted" style="font-size:13px">${s.lessonDays.length} of ${nClasses} ${nClasses === 1 ? 'class has' : 'classes have'} a technique logged ${RANGE_LABEL[state.range]}</span>
+    </div>
+    <div class="curr">
+      <div class="card pos">
+        <div class="label">Positions covered</div>
+        ${POSITIONS.map(p => `<div class="prow ${s.posCounts[p] ? '' : 'gap'}"><span class="pn">${p}</span><span class="ptrack"><span class="pfill" style="width:${Math.round((s.posCounts[p] || 0) / maxPos * 100)}%"></span></span><span class="pc num">${s.posCounts[p] || '—'}</span></div>`).join('')}
+        <div class="label" style="margin-top:14px">By type</div>
+        <div class="chips tiny static">${TYPES.map(t => `<span class="chip">${t} <b class="num">${s.typeCounts[t] || 0}</b></span>`).join('')}</div>
+      </div>
+      <div class="card techs table">${s.techniques.length ? `<table>
+        <thead><tr><th>Technique</th><th>Position</th><th class="r">Taught</th><th class="r">Last</th></tr></thead>
+        <tbody>${s.techniques.map(t => `<tr><td style="font-weight:500">${esc(t.title)}</td><td class="muted" style="font-size:13px">${esc([...t.positions].join(', ')) || '—'}</td><td class="r num">${t.count}×</td><td class="r"><button class="datechip" data-goto="${t.last}" title="Open ${fmtLong(t.last)}">${fmtShort(t.last)}</button></td></tr>`).join('')}</tbody>
+      </table>` : `<div class="empty small"><p>No techniques logged ${RANGE_LABEL[state.range]}. Add one from the day panel on the calendar.</p></div>`}</div>
+    </div>`;
+
+  return `
+    <div class="sum-head">
+      <div><h2>Summary</h2><div class="muted">${nClasses ? `${nClasses} ${nClasses === 1 ? 'class' : 'classes'} ${rangeNote}` : `No classes logged ${RANGE_LABEL[state.range]}`}</div></div>
+      <div class="right">
+        <div class="chips" role="tablist">${Object.keys(RANGE_LABEL).map(r => `<button class="chip ${state.range === r ? 'active' : ''}" data-range="${r}">${cap(RANGE_LABEL[r])}</button>`).join('')}</div>
+        ${canExport ? `<button class="btn sm" data-act="export" ${rows.length ? '' : 'disabled'}>Export CSV</button>` : ''}
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="card tile"><div class="label">Classes held</div><div class="v num">${nClasses}</div><div class="sub">days with a check-in or a lesson logged</div></div>
+      <div class="card tile"><div class="label">Check-ins</div><div class="v num">${s.checkins}</div><div class="sub">${nClasses ? `${s.avg.toFixed(1)} people per class on average` : 'none yet'}</div></div>
+      <div class="card tile"><div class="label">Showed up</div><div class="v num">${s.active}<small>/ ${Object.keys(state.members).length}</small></div><div class="sub">people who trained at least once</div></div>
+      <div class="card tile"><div class="label">Busiest day</div><div class="v">${s.busiest >= 0 ? DOW_LONG[s.busiest] : '—'}</div><div class="sub">${s.busiest >= 0 ? `${s.dowTotals[s.busiest]} check-ins on ${DOW_LONG[s.busiest]}s` : 'no data yet'}</div></div>
+    </div>
+    ${fadingHTML}
+    <div class="section-title"><h3>Students</h3></div>
+    <div class="card table">
+      ${rows.length ? `<table>
+        <thead><tr><th>Student</th><th class="r">Sessions</th><th>Of classes held</th><th>Mon → Sun</th><th class="r">Streak</th><th class="r">Last class</th></tr></thead>
+        <tbody>${rows.map(tr).join('')}</tbody>
+      </table>` : `<div class="empty"><p>Nothing to summarise yet. Add people to the roster and log a class from the calendar.</p></div>`}
+    </div>
+    <div class="wkleg"><span><b>Streak</b> counts consecutive weeks with at least one class, up to this week.</span><span><b>Mon → Sun</b> bars show which weekdays each person trains.</span></div>
+    ${curriculumHTML}`;
+}
+function renderDetail(p, s) {
+  if (!p.dates.length) return `<div class="muted" style="font-size:13px">No classes attended ${RANGE_LABEL[state.range]}.</div>`;
+  const groups = {};
+  [...p.dates].sort().reverse().forEach(d => { const k = d.slice(0, 7); (groups[k] = groups[k] || []).push(d); });
+  const seen = p.dates.filter(d => hasLesson(state.days[d])).length;
+  const missedPos = new Set();
+  s.lessonDays.filter(d => !p.dates.includes(d)).forEach(d => (state.days[d].lesson.positions || []).forEach(x => missedPos.add(x)));
+  p.dates.forEach(d => { if (hasLesson(state.days[d])) (state.days[d].lesson.positions || []).forEach(x => missedPos.delete(x)); });
+  const exposure = s.lessonDays.length
+    ? `<div class="exposure">Was on the mat for <b class="num">${seen}</b> of <b class="num">${s.lessonDays.length}</b> logged techniques${missedPos.size ? ` · never saw: ${[...missedPos].map(esc).join(', ')}` : ''}</div>`
+    : '';
+  return `${exposure}<div class="months">${Object.entries(groups).map(([k, ds]) => {
+    const d = parse(k + '-01');
+    return `<div class="mon"><div class="mn">${MONTHS[d.getMonth()]} ${d.getFullYear()} <span class="muted" style="font-family:var(--body);font-size:12px;font-weight:500">· ${ds.length}</span></div>
+      <div class="datechips">${ds.map(x => {
+        const l = hasLesson(state.days[x]) ? ' — ' + lessonLine(state.days[x].lesson) : '';
+        return `<button class="datechip ${l ? 'has-lesson' : ''}" data-goto="${x}" title="${esc(fmtLong(x) + l)}"><small>${DOW[dow(parse(x))]}</small>${parse(x).getDate()}</button>`;
+      }).join('')}</div></div>`;
+  }).join('')}</div>`;
+}
+
+/* ---------- export ---------- */
+function buildCSV() {
+  const s = computeStats(state.range);
+  const [a, b] = rangeBounds(state.range);
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const lines = [['Name', 'Belt', 'Stripes', 'Status', `Sessions (${a === '0000-01-01' ? 'all time' : a + ' to ' + b})`, 'Classes held in range', 'Attendance %', 'Current week streak', 'Last class', 'Dates attended'].map(q).join(',')];
+  Object.entries(s.per).filter(([id]) => state.members[id]).sort((x, y) => y[1].sessions - x[1].sessions).forEach(([id, p]) => {
+    const m = state.members[id];
+    lines.push([m.name, m.belt || 'white', m.stripes || 0, m.active === false ? 'archived' : 'active', p.sessions, s.classDays.length,
+      s.classDays.length ? Math.round(p.sessions / s.classDays.length * 100) : 0, weekStreak(id), p.last || '', p.dates.join(' ')].map(q).join(','));
+  });
+  return lines.join('\r\n');
+}
+async function exportCSV() {
+  const csv = buildCSV();
+  const filename = `mat-time-${state.range}-${TODAY}.csv`;
+  if (downloads) {
+    try { await downloads.save({ filename, data: csv }); toast('Exported.'); }
+    catch (e) { if (!(e && /cancel|declin|reject/i.test(e.code || ''))) toast('Export did not complete.'); }
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  const link = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* ---------- events ---------- */
+$('#tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  state.view = t.dataset.view; state.editing = null; render();
+});
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act],[data-nav],[data-date],[data-toggle],[data-edit],[data-archive],[data-delete],[data-range],[data-open],[data-goto],[data-lesson],[data-pos],[data-type],[data-fade]');
+  if (!el) return;
+  if (el.dataset.lesson) {
+    const cur = state.days[state.selected] && state.days[state.selected].lesson;
+    if (el.dataset.lesson === 'edit') { state.lessonEdit = true; state.lessonDraft = cur ? { title: cur.title || '', positions: [...(cur.positions || [])], types: [...(cur.types || [])] } : { title: '', positions: [], types: [] }; }
+    else if (el.dataset.lesson === 'cancel') { state.lessonEdit = false; state.lessonDraft = null; }
+    else if (el.dataset.lesson === 'clear') { state.lessonEdit = false; state.lessonDraft = null; setLesson(state.selected, null); toast('Technique removed.'); return; }
+    render();
+    if (state.lessonEdit) { const inp = $('#lesson-form [name=title]'); if (inp) inp.focus(); }
+    return;
+  }
+  if (el.dataset.pos || el.dataset.type) {
+    const d = state.lessonDraft; if (!d) return;
+    const inp = $('#lesson-form [name=title]'); if (inp) d.title = inp.value;
+    const list = el.dataset.pos ? d.positions : d.types, v = el.dataset.pos || el.dataset.type;
+    const i = list.indexOf(v); i >= 0 ? list.splice(i, 1) : list.push(v);
+    return render();
+  }
+  if (el.dataset.fade) { state.fadeDays = Number(el.dataset.fade); return render(); }
+  if (el.dataset.act === 'remove-sample') return removeSampleData();
+  if (el.dataset.act === 'load-sample') return loadSampleData();
+  if (el.dataset.act === 'export') return exportCSV();
+  if (el.dataset.nav) {
+    if (el.dataset.nav === 'today') { state.cursor = new Date(todayD.getFullYear(), todayD.getMonth(), 1); state.selected = TODAY; }
+    else state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + Number(el.dataset.nav), 1);
+    return render();
+  }
+  if (el.dataset.date) { state.selected = el.dataset.date; state.q = ''; state.lessonEdit = false; state.lessonDraft = null; return render(); }
+  if (el.dataset.toggle) return togglePresent(state.selected, el.dataset.toggle);
+  if (el.dataset.edit) { state.editing = state.editing === el.dataset.edit ? null : el.dataset.edit; return render(); }
+  if (el.dataset.archive) {
+    const id = el.dataset.archive, m = state.members[id];
+    return saveMember(id, { ...m, active: m.active === false });
+  }
+  if (el.dataset.delete) {
+    const id = el.dataset.delete, m = state.members[id], lt = lifetime(id);
+    if (confirm(`Delete ${m.name} permanently? Their ${lt.n} logged ${lt.n === 1 ? 'class' : 'classes'} will disappear from every summary. Archive instead if you want to keep the history.`)) deleteMember(id);
+    return;
+  }
+  if (el.dataset.range) { state.range = el.dataset.range; return render(); }
+  if (el.dataset.goto) { state.view = 'calendar'; state.selected = el.dataset.goto; state.lessonEdit = false; state.lessonDraft = null; const d = parse(el.dataset.goto); state.cursor = new Date(d.getFullYear(), d.getMonth(), 1); return render(); }
+  if (el.dataset.open) { state.openMember = state.openMember === el.dataset.open ? null : el.dataset.open; return render(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const row = e.target.closest && e.target.closest('tr.mem[data-open]');
+  if (row) { e.preventDefault(); state.openMember = state.openMember === row.dataset.open ? null : row.dataset.open; render(); }
+});
+
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.id === 'lesson-form') {
+    e.preventDefault();
+    const d = state.lessonDraft || { positions: [], types: [] };
+    const title = f.title.value.trim();
+    state.lessonEdit = false; state.lessonDraft = null;
+    if (!title && !d.positions.length && !d.types.length) { setLesson(state.selected, null); return; }
+    setLesson(state.selected, { title, positions: [...d.positions], types: [...d.types] });
+    toast(state.selected > TODAY ? 'Lesson planned.' : 'Technique saved.');
+    return;
+  }
+  if (f.id === 'quick-add') {
+    e.preventDefault();
+    const id = addMember(f.name.value);
+    if (id) { togglePresent(state.selected, id); toast(`${state.members[id].name} added and marked present.`); }
+    return;
+  }
+  if (f.id === 'add-form') {
+    e.preventDefault();
+    const id = addMember(f.name.value, f.belt.value, f.stripes.value);
+    if (id) { toast(`${state.members[id].name} added to the roster.`); setTimeout(() => { const n = $('#af-name'); if (n) n.focus(); }, 0); }
+    return;
+  }
+  if (f.dataset.editform) {
+    e.preventDefault();
+    const id = f.dataset.editform, m = state.members[id];
+    const name = f.name.value.trim(); if (!name) return;
+    state.editing = null;
+    saveMember(id, { ...m, name, belt: f.belt.value, stripes: Number(f.stripes.value) });
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.id !== 'q') return;
+  state.q = e.target.value;
+  const panel = e.target.closest('.panel');
+  const tmp = document.createElement('div'); tmp.innerHTML = renderDayPanel();
+  panel.querySelector('.checklist').innerHTML = tmp.querySelector('.checklist').innerHTML;
+});
+
+/* ---------- sign-in + encryption ----------
+   No password or hash lives in this file. The coach sets a password the first
+   time the app opens in a browser. PBKDF2 turns it into an AES-256 key that
+   both verifies later sign-ins and encrypts everything saved in that browser.
+   Forgetting the password means the data on that device cannot be recovered,
+   so keep a backup (header → Backup). */
+const COACH = 'marion17';
+const AUTH_KEY = 'mat-time-auth', SESSION_KEY = 'mat-time-key', PERSIST_KEY = 'mat-time-key-persist';
+const PBKDF2_ITERATIONS = 310000, PERSIST_HOURS = 12;
+let cryptoKey = null, authedUser = null;
+
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const secure = () => !!(window.crypto && crypto.subtle && window.isSecureContext !== false);
+async function deriveKey(password, salt, iterations) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+}
+async function encryptJSON(key, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return { iv: b64(iv), ct: b64(ct) };
+}
+async function decryptJSON(key, rec) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(rec.iv) }, key, unb64(rec.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+const authRecord = () => { try { return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (e) { return null; } };
+async function createAuth(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await deriveKey(password, salt, PBKDF2_ITERATIONS);
+  const check = await encryptJSON(key, { ok: true, user: COACH });
+  localStorage.setItem(AUTH_KEY, JSON.stringify({ user: COACH, salt: b64(salt), iterations: PBKDF2_ITERATIONS, check }));
+  return key;
+}
+async function verifyPassword(password) {
+  const rec = authRecord(); if (!rec) return null;
+  const key = await deriveKey(password, unb64(rec.salt), rec.iterations);
+  try { const c = await decryptJSON(key, rec.check); return c && c.ok ? key : null; } catch (e) { return null; }
+}
+async function keepKey(key, persist) {
+  const raw = b64(await crypto.subtle.exportKey('raw', key));
+  try {
+    sessionStorage.setItem(SESSION_KEY, raw);
+    if (persist) localStorage.setItem(PERSIST_KEY, JSON.stringify({ k: raw, exp: Date.now() + PERSIST_HOURS * 3600000 }));
+  } catch (e) { /* private mode: sign in again next time */ }
+}
+async function restoreKey() {
+  try {
+    let raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      const p = JSON.parse(localStorage.getItem(PERSIST_KEY) || 'null');
+      if (p && p.exp > Date.now()) raw = p.k; else localStorage.removeItem(PERSIST_KEY);
+    }
+    if (!raw) return null;
+    return await crypto.subtle.importKey('raw', unb64(raw), 'AES-GCM', true, ['encrypt', 'decrypt']);
+  } catch (e) { return null; }
+}
+function dropKey() { try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(PERSIST_KEY); } catch (e) { /* ignore */ } }
+
+function renderMe() {
+  $('#me').innerHTML = authedUser
+    ? `<b>${esc(authedUser)}</b>
+       <button class="btn sm quiet" data-act="backup" title="Download a copy of all data">Backup</button>
+       <button class="btn sm quiet" data-act="restore" title="Load a backup file">Restore</button>
+       <button class="btn sm quiet" data-act="change-pass">Password</button>
+       <button class="btn sm quiet" data-act="logout">Log out</button>`
+    : '';
+}
+function enter(key) {
+  cryptoKey = key; authedUser = COACH;
+  $('#gate').hidden = true; $('#app').hidden = false;
+  renderMe(); setStatus(); init();
+}
+function gateBrand() {
+  return `<div class="brand"><div class="mark" aria-hidden="true"><i></i></div><h1 style="font-size:24px">Mat Time<span class="coach">Coach</span></h1></div>`;
+}
+function showGate() {
+  $('#app').hidden = true; $('#gate').hidden = false;
+  const gate = $('#gate');
+  if (!secure()) {
+    gate.innerHTML = `<div class="card login">${gateBrand()}<h2>Secure connection needed</h2><p class="hint">Sign-in and encryption need https or a local file. Open the app over https and try again.</p></div>`;
+    return;
+  }
+  const first = !authRecord();
+  gate.innerHTML = first ? `
+    <form class="card login" id="setup-form" novalidate>
+      ${gateBrand()}
+      <h2>Set your password</h2>
+      <p class="hint">This browser has no coach password yet. Choose one for <b>${COACH}</b>. It also encrypts everything saved here, so nothing is readable without it and it cannot be recovered if forgotten.</p>
+      <label><span class="label">Username</span><input class="input" name="user" value="${COACH}" readonly></label>
+      <label><span class="label">Password</span><input class="input" name="pass" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label><span class="label">Repeat password</span><input class="input" name="again" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn primary" type="submit">Create password</button>
+      <div class="err" id="login-err" role="alert"></div>
+    </form>`
+  : `
+    <form class="card login" id="login-form" novalidate>
+      ${gateBrand()}
+      <h2>Coach sign-in</h2>
+      <label><span class="label">Username</span><input class="input" name="user" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+      <label><span class="label">Password</span><input class="input" name="pass" type="password" autocomplete="current-password" required></label>
+      <label class="check"><input type="checkbox" name="remember"> Stay signed in on this device for ${PERSIST_HOURS} hours</label>
+      <button class="btn primary" type="submit">Sign in</button>
+      <div class="err" id="login-err" role="alert"></div>
+      <button class="link" type="button" data-act="reset-device">Forgot the password? Reset this device</button>
+    </form>`;
+  setTimeout(() => { const p = gate.querySelector(first ? '[name=pass]' : '[name=user]'); if (p) p.focus(); }, 0);
+}
+
+$('#gate').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, err = $('#login-err'), btn = f.querySelector('[type=submit]');
+  const p = f.pass.value;
+  if (f.id === 'setup-form') {
+    if (p.length < 8) { err.textContent = 'Use at least 8 characters. Longer is safer.'; return; }
+    if (p !== f.again.value) { err.textContent = 'The two passwords do not match.'; return; }
+    btn.disabled = true; btn.textContent = 'Creating…';
+    try { const key = await createAuth(p); await keepKey(key, false); enter(key); toast('Password set. Keep a backup from the header.'); }
+    catch (ex) { console.error(ex); err.textContent = 'Could not set the password in this browser.'; btn.disabled = false; btn.textContent = 'Create password'; }
+    return;
+  }
+  const u = f.user.value.trim().toLowerCase();
+  if (!u || !p) { err.textContent = 'Enter your username and password.'; return; }
+  if (u !== COACH) { err.textContent = 'Wrong username or password.'; f.pass.select(); return; }
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const key = await verifyPassword(p).catch(() => null);
+  if (!key) { err.textContent = 'Wrong username or password.'; btn.disabled = false; btn.textContent = 'Sign in'; f.pass.select(); return; }
+  await keepKey(key, f.remember.checked);
+  enter(key);
+});
+
+$('#pass-form').addEventListener('submit', async e => {
+  const f = e.target, err = $('#pass-err');
+  if (e.submitter && e.submitter.value !== 'save') return;
+  e.preventDefault();
+  if (f.next.value !== f.again.value) { err.textContent = 'The new passwords do not match.'; return; }
+  if (f.next.value.length < 8) { err.textContent = 'Use at least 8 characters.'; return; }
+  const ok = await verifyPassword(f.cur.value).catch(() => null);
+  if (!ok) { err.textContent = 'Current password is wrong.'; return; }
+  try {
+    if (backend && backend.flush) await backend.flush();
+    const key = await createAuth(f.next.value);
+    cryptoKey = key;
+    if (backend && backend.kind === 'local') await backend.persistDay(); // re-encrypt under the new key
+    const persisted = !!localStorage.getItem(PERSIST_KEY);
+    await keepKey(key, persisted);
+    f.reset(); err.textContent = ''; $('#pass-dialog').close();
+    toast('Password changed. Data on this device re-encrypted.');
+  } catch (ex) { console.error(ex); err.textContent = 'Could not change the password here.'; }
+});
+
+/* backup + restore */
+async function backup() {
+  const payload = JSON.stringify({ app: 'mat-time-coach', version: 2, exportedAt: new Date().toISOString(), members: state.members, days: state.days }, null, 1);
+  const filename = `mat-time-backup-${TODAY}.json`;
+  if (downloads) {
+    try { await downloads.save({ filename, data: payload }); toast('Backup saved.'); } catch (e) { toast('Backup did not complete.'); }
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+  const link = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Backup downloaded. Keep it somewhere safe; it is not encrypted.');
+}
+$('#restore-file').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = '';
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (ex) { toast('That file is not a Mat Time backup.'); return; }
+  if (!data || typeof data.members !== 'object' || typeof data.days !== 'object') { toast('That file is not a Mat Time backup.'); return; }
+  const nM = Object.keys(data.members).length, nD = Object.keys(data.days).length;
+  if (!confirm(`Replace everything here with this backup? It holds ${nM} people and ${nD} logged days${data.exportedAt ? `, exported ${data.exportedAt.slice(0, 10)}` : ''}. Current data on this device will be overwritten.`)) return;
+  if (backend.kind === 'db') {
+    Object.keys(state.members).forEach(id => { if (!data.members[id]) backend.deleteMember(id); });
+    Object.keys(state.days).forEach(d => { if (!data.days[d]) backend.persistDay(d, null); });
+    Object.entries(data.members).forEach(([id, m]) => backend.persistMember(id, m));
+    Object.entries(data.days).forEach(([d, day]) => backend.persistDay(d, day));
+  }
+  state.members = data.members; state.days = data.days;
+  if (backend.kind === 'local') backend.persistDay();
+  render();
+  toast('Backup restored.');
+});
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act="logout"],[data-act="change-pass"],[data-act="pass-cancel"],[data-act="backup"],[data-act="restore"],[data-act="reset-device"]');
+  if (!el) return;
+  const act = el.dataset.act;
+  if (act === 'logout') { dropKey(); cryptoKey = null; authedUser = null; teardown(); showGate(); }
+  else if (act === 'change-pass') { $('#pass-err').textContent = ''; $('#pass-form').reset(); $('#pass-dialog').showModal(); $('#pass-form').cur.focus(); }
+  else if (act === 'pass-cancel') { $('#pass-form').reset(); $('#pass-dialog').close(); }
+  else if (act === 'backup') backup();
+  else if (act === 'restore') $('#restore-file').click();
+  else if (act === 'reset-device') {
+    if (!confirm('Reset this device? The password and ALL attendance data saved in this browser will be erased. Only do this if you have a backup or the data lives in the shared database.')) return;
+    try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(DATA_KEY); localStorage.removeItem(LEGACY_KEY); } catch (ex) { /* ignore */ }
+    dropKey(); showGate(); toast('Device reset. Choose a new password.');
+  }
+});
+
+setStatus();
+(async () => {
+  const key = secure() && authRecord() ? await restoreKey() : null;
+  if (key) enter(key); else showGate();
+})();
+})();
+</script>
